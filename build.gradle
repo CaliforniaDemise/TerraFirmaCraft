@@ -16,33 +16,17 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 // Required build script stuff
-buildscript {
-    repositories {
-        // Repositories required for ForgeGradle go here.
-        jcenter()
-        maven {
-            name = "forge"
-            url = "https://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "curseforge"
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.4.0"
-        classpath "com.wynprice.cursemaven:CurseMaven:2.1.0"
-    }
-}
 plugins {
     id 'java'
     id 'idea'
+    id 'java-library'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.3.33'
 }
-// Go Forge go!
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: "com.matthewprenger.cursegradle"
-apply plugin: 'com.wynprice.cursemaven'
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
 
 // Load properties file, easier to manage versions of required dependencies
 file "build.properties" withReader {
@@ -91,9 +75,9 @@ String runGitCommand(String cmd_args)
 }
 
 minecraft { // Only change any of this with prior approval from the dev team!
-    version = "${config.minecraft.version}-${config.forge.version}"
-    runDir = "run"
-    mappings = "stable_39"
+    mcVersion = config.minecraft.version
+    username = 'Developer'
+    useDependencyAccessTransformers = true
 }
 
 repositories {
@@ -131,19 +115,24 @@ repositories {
 
 String mcVersion = config.minecraft.version
 String shortVersion = mcVersion.substring(0, mcVersion.lastIndexOf('.'))
-String strippedVersion = shortVersion.replace(".", "") + "0"
 
 dependencies {
     // Mod dependencies go here.
     // Do not add dependencies without prior approval from the dev team. You can update existing ones.
-    deobfProvided "CraftTweaker2:CraftTweaker2-MC${strippedVersion}-Main:${config.crafttweaker.version}"
-    deobfProvided "mezz.jei:jei_${config.minecraft.version}:${config.jei.version}"
+   // deobfProvided "CraftTweaker2:CraftTweaker2-MC${strippedVersion}-Main:${config.crafttweaker.version}"
+    implementation rfg.deobf("mezz.jei:jei_${config.minecraft.version}:${config.jei.version}")
 
     // For now, since maven is no show, use the curse maven plugin to resolve the exact file name
     compileOnly "curse.maven:hwyla-253449:2568751"
-    //compileOnly "mcp.mobius.waila:Hwyla:${config.HWYLA.version}_${config.minecraft.version}"
-    deobfProvided "mcjty.theoneprobe:TheOneProbe-${shortVersion}:${config.TOP.version}"
-    deobfProvided "vazkii.patchouli:Patchouli:${config.patchouli.version}"
+    compileOnly rfg.deobf("mcjty.theoneprobe:TheOneProbe-${shortVersion}:${config.TOP.version}")
+    compileOnly rfg.deobf("vazkii.patchouli:Patchouli:${config.patchouli.version}")
+}
+
+for (File at : sourceSets.getByName("main").resources.files) {
+    if (at.name.toLowerCase().endsWith("_at.cfg")) {
+        tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(at)
+        tasks.srgifyBinpatchedJar.accessTransformerFiles.from(at)
+    }
 }
 
 processResources {
@@ -151,26 +140,20 @@ processResources {
     inputs.property "version", version
     inputs.property "mcversion", config.minecraft.version
 
-    // copy mcmod.info from resources
-    from(sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
-
-        // replace version and mcversion variables/placeholders
-        expand "mod_version": version, "mc_version": config.minecraft.version
+    filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
+        fcd.expand (
+            'mod_version': project.version,
+            'mc_version': project.minecraft.version
+        )
     }
 
-    // copy everything else from resources
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "mcmod.info"
-    }
+    // Make sure Access Transformer files are in META-INF folder
+    rename '(.+_at.cfg)', 'META-INF/$1'
 
     // from the project root, include the LICENSE file
     from('.') {
         include "LICENSE.txt"
     }
-
-    // move any Access Transformer (there is/should be only 1, but this is nice and safe) to the right folder.
-    rename '(.+_at.cfg)', 'META-INF/$1'
 
     // Write the update's json file. This file is kept by jenkins and put in a WWW accessible folder.
     // For more info on the exact format, see Forge documentation & source code.
@@ -197,16 +180,17 @@ processResources {
 }
 
 // Deobf jar allows people to drop this in mod folder on a dev environment
-task deobfJar(type: Jar, dependsOn: 'jar') {
+tasks.register('deobfJar', Jar) {
+    dependsOn 'jar'
     from sourceSets.main.output
-    classifier "deobf"
+    archiveClassifier = "deobf"
 }
 
 artifacts {
     archives deobfJar // Default jars are already in there.
 }
 
-project.tasks.withType(Jar) { jarTask -> // For all jar tasks
+project.tasks.withType(Jar).configureEach { jarTask -> // For all jar tasks
     jarTask.manifest {
         attributes 'FMLAT': 'tfc_at.cfg' // See FML source code
         attributes 'GIT_HASH': runGitCommand("log -n 1 --format='%H'")
@@ -214,11 +198,12 @@ project.tasks.withType(Jar) { jarTask -> // For all jar tasks
     }
     // Add "MC${mcversion}" to the jar, so the name ends up `TerraFirmaCraft-MC1.12.2-0.0.0.0.jar`
     // This didn't used to have the `MC` prefix, but it confuses some hosting websites as the actual version numbers then.
-    jarTask.appendix = "MC" + project.minecraft.version
+    jarTask.archiveAppendix = "MC" + project.minecraft.version
 }
 
 // If the keystore properties are installed (in ~/.gradle/gradle.properties) only.
 // Only really relevant on the build server, but usable in dev also.
+/*
 task signJar(type: SignJar, dependsOn: reobfJar) {
     if (!project.hasProperty("signjar.keystore")) return
     keyStore = project.getProperty("signjar.keystore")
@@ -260,3 +245,4 @@ curseforge {
         javaVersionAutoDetect = false
     }
 }
+*/
