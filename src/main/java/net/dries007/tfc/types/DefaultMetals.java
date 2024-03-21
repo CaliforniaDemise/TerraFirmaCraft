@@ -5,25 +5,23 @@
 
 package net.dries007.tfc.types;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import net.dries007.tfc.api.recipes.AlloyRecipe;
 import net.dries007.tfc.api.registries.TFCRegistryEvent;
 import net.dries007.tfc.api.types.Metal;
 import net.dries007.tfc.api.types.Ore;
 import net.dries007.tfc.objects.ArmorMaterialTFC;
 import net.dries007.tfc.objects.ToolMaterialsTFC;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 import static net.dries007.tfc.api.types.Metal.Tier.*;
 
 @SuppressWarnings("WeakerAccess")
 @Mod.EventBusSubscriber(modid = MOD_ID)
-public final class DefaultMetals
-{
+public final class DefaultMetals {
     /*
      * Metals
      */
@@ -97,8 +95,7 @@ public final class DefaultMetals
     public static final ResourceLocation LAPIS_LAZULI = new ResourceLocation(MOD_ID, "lapis_lazuli");
 
     @SubscribeEvent
-    public static void onPreRegisterOre(TFCRegistryEvent.RegisterPreBlock<Ore> event)
-    {
+    public static void onPreRegisterOre(TFCRegistryEvent.RegisterPreBlock<Ore> event) {
         event.getRegistry().registerAll(
             new Ore(NATIVE_COPPER, COPPER, 0.75D, 0.33D),
             new Ore(NATIVE_GOLD, GOLD, 0.25D, 0.15D),
@@ -139,8 +136,7 @@ public final class DefaultMetals
     }
 
     @SubscribeEvent
-    public static void onPreRegisterMetal(TFCRegistryEvent.RegisterPreBlock<Metal> event)
-    {
+    public static void onPreRegisterMetal(TFCRegistryEvent.RegisterPreBlock<Metal> event) {
         event.getRegistry().registerAll(
             new Metal(BISMUTH, TIER_I, true, 0.14f, 270, 0xFF486B72, null, null),
             new Metal(BISMUTH_BRONZE, TIER_II, true, 0.35f, 985, 0xFF418E4F, ToolMaterialsTFC.BISMUTH_BRONZE, ArmorMaterialTFC.BISMUTH_BRONZE),
@@ -175,8 +171,7 @@ public final class DefaultMetals
     }
 
     @SubscribeEvent
-    public static void onRegisterAlloyRecipe(RegistryEvent.Register<AlloyRecipe> event)
-    {
+    public static void onRegisterAlloyRecipe(RegistryEvent.Register<AlloyRecipe> event) {
         event.getRegistry().registerAll(
             new AlloyRecipe.Builder(BISMUTH_BRONZE).add(ZINC, 0.2, 0.3).add(COPPER, 0.5, 0.65).add(BISMUTH, 0.1, 0.2).build(),
             new AlloyRecipe.Builder(BLACK_BRONZE).add(COPPER, 0.5, 0.7).add(SILVER, 0.1, 0.25).add(GOLD, 0.1, 0.25).build(),

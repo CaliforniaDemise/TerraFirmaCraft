@@ -18,15 +18,13 @@ import static net.dries007.tfc.util.Helpers.getNull;
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(modid = MOD_ID)
 @GameRegistry.ObjectHolder(MOD_ID)
-public final class PotionEffectsTFC
-{
+public final class PotionEffectsTFC {
     public static final Potion OVERBURDENED = getNull();
     public static final Potion THIRST = getNull();
     public static final Potion FOOD_POISON = getNull();
 
     @SubscribeEvent
-    public static void registerPotionEffects(RegistryEvent.Register<Potion> event)
-    {
+    public static void registerPotionEffects(RegistryEvent.Register<Potion> event) {
         event.getRegistry().registerAll(
             new PotionOverburdened().setRegistryName(MOD_ID, "overburdened"),
             new PotionThirst().setRegistryName(MOD_ID, "thirst"),

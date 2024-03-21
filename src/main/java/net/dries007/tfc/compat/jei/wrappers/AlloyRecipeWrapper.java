@@ -23,23 +23,19 @@ import net.dries007.tfc.objects.fluids.FluidsTFC;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class AlloyRecipeWrapper implements IRecipeWrapper
-{
+public class AlloyRecipeWrapper implements IRecipeWrapper {
     private final String[] slotContent = {"", "", "", ""};
     private final AlloyRecipe recipe;
 
-    public AlloyRecipeWrapper(AlloyRecipe recipe)
-    {
+    public AlloyRecipeWrapper(AlloyRecipe recipe) {
         this.recipe = recipe;
     }
 
     @Override
-    public void getIngredients(IIngredients ingredients)
-    {
+    public void getIngredients(IIngredients ingredients) {
         int i = 0;
         List<List<FluidStack>> allInputs = new ArrayList<>();
-        for (Metal metal : recipe.getMetals().keySet())
-        {
+        for (Metal metal : recipe.getMetals().keySet()) {
             int min = (int) (recipe.getMetals().get(metal).getMin() * 100);
             int max = (int) (recipe.getMetals().get(metal).getMax() * 100);
             slotContent[i] = min + "-" + max + "%";
@@ -52,10 +48,8 @@ public class AlloyRecipeWrapper implements IRecipeWrapper
     }
 
     @Override
-    public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
-    {
-        for (int i = 0; i < 4; i++)
-        {
+    public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
+        for (int i = 0; i < 4; i++) {
             int row = i / 2;
             int column = i % 2;
             float x = 20f + column * 60f;

@@ -5,26 +5,10 @@
 
 package net.dries007.tfc.objects.fluids;
 
-import java.awt.*;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.init.MobEffects;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.EnumRarity;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-
 import net.dries007.tfc.ConfigTFC;
 import net.dries007.tfc.Constants;
 import net.dries007.tfc.api.capability.food.FoodData;
@@ -39,11 +23,25 @@ import net.dries007.tfc.objects.fluids.properties.FluidWrapper;
 import net.dries007.tfc.objects.fluids.properties.MetalProperty;
 import net.dries007.tfc.objects.potioneffects.PotionEffectsTFC;
 import net.dries007.tfc.util.calendar.ICalendar;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.EnumRarity;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+
+import javax.annotation.Nonnull;
+import java.awt.*;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
-public final class FluidsTFC
-{
+public final class FluidsTFC {
     private static final ResourceLocation STILL = new ResourceLocation(MOD_ID, "blocks/fluid_still");
     private static final ResourceLocation FLOW = new ResourceLocation(MOD_ID, "blocks/fluid_flow");
 
@@ -79,27 +77,22 @@ public final class FluidsTFC
     private static ImmutableMap<Metal, FluidWrapper> allMetalFluids;
     private static ImmutableSet<FluidWrapper> allOtherFiniteFluids;
 
-    public static ImmutableSet<FluidWrapper> getAllAlcoholsFluids()
-    {
+    public static ImmutableSet<FluidWrapper> getAllAlcoholsFluids() {
         return allAlcoholsFluids;
     }
 
-    public static ImmutableSet<FluidWrapper> getAllOtherFiniteFluids()
-    {
+    public static ImmutableSet<FluidWrapper> getAllOtherFiniteFluids() {
         return allOtherFiniteFluids;
     }
 
-    public static ImmutableCollection<FluidWrapper> getAllMetalFluids()
-    {
+    public static ImmutableCollection<FluidWrapper> getAllMetalFluids() {
         return allMetalFluids.values();
     }
 
     @Nonnull
     @SuppressWarnings("ConstantConditions")
-    public static FluidWrapper getWrapper(@Nonnull Fluid fluid)
-    {
-        if (!WRAPPERS.containsKey(fluid))
-        {
+    public static FluidWrapper getWrapper(@Nonnull Fluid fluid) {
+        if (!WRAPPERS.containsKey(fluid)) {
             // Should only ever get called for non-tfc fluids, but in which case prevents a null wrapper getting returned
             WRAPPERS.put(fluid, new FluidWrapper(fluid, false));
         }
@@ -107,44 +100,36 @@ public final class FluidsTFC
     }
 
     @Nonnull
-    public static Set<FluidWrapper> getAllWrappers()
-    {
+    public static Set<FluidWrapper> getAllWrappers() {
         return WRAPPERS.values();
     }
 
     @Nonnull
-    public static Fluid getFluidFromMetal(@Nonnull Metal metal)
-    {
+    public static Fluid getFluidFromMetal(@Nonnull Metal metal) {
         return allMetalFluids.get(metal).get();
     }
 
     @Nonnull
-    public static Metal getMetalFromFluid(@Nonnull Fluid fluid)
-    {
+    public static Metal getMetalFromFluid(@Nonnull Fluid fluid) {
         return getWrapper(fluid).get(MetalProperty.METAL).getMetal();
     }
 
     @Nonnull
-    public static FluidWrapper getFluidFromDye(@Nonnull EnumDyeColor dyeColor)
-    {
+    public static FluidWrapper getFluidFromDye(@Nonnull EnumDyeColor dyeColor) {
         return DYE_FLUIDS.get(dyeColor);
     }
 
-    public static void registerFluids()
-    {
+    public static void registerFluids() {
         FRESH_WATER = registerFluid(new Fluid("fresh_water", STILL, FLOW, 0xFF296ACD)).with(DrinkableProperty.DRINKABLE, player -> {
-            if (player.getFoodStats() instanceof FoodStatsTFC)
-            {
+            if (player.getFoodStats() instanceof FoodStatsTFC) {
                 ((FoodStatsTFC) player.getFoodStats()).addThirst(40);
             }
         });
         HOT_WATER = registerFluid(new Fluid("hot_water", STILL, FLOW, 0xFF345FDA).setTemperature(350));
         SALT_WATER = registerFluid(new Fluid("salt_water", STILL, FLOW, 0xFF1F5099)).with(DrinkableProperty.DRINKABLE, player -> {
-            if (player.getFoodStats() instanceof FoodStatsTFC)
-            {
+            if (player.getFoodStats() instanceof FoodStatsTFC) {
                 ((FoodStatsTFC) player.getFoodStats()).addThirst(-10);
-                if (Constants.RNG.nextDouble() < ConfigTFC.General.PLAYER.chanceThirstOnSaltyDrink)
-                {
+                if (Constants.RNG.nextDouble() < ConfigTFC.General.PLAYER.chanceThirstOnSaltyDrink) {
                     player.addPotionEffect(new PotionEffect(PotionEffectsTFC.THIRST, 600, 0));
                 }
             }
@@ -152,12 +137,10 @@ public final class FluidsTFC
 
         DrinkableProperty alcoholProperty = player -> {
             IPlayerData playerData = player.getCapability(CapabilityPlayerData.CAPABILITY, null);
-            if (player.getFoodStats() instanceof FoodStatsTFC && playerData != null)
-            {
+            if (player.getFoodStats() instanceof FoodStatsTFC && playerData != null) {
                 ((FoodStatsTFC) player.getFoodStats()).addThirst(10);
                 playerData.addIntoxicatedTime(4 * ICalendar.TICKS_IN_HOUR);
-                if (playerData.getIntoxicatedTime() > 24 * ICalendar.TICKS_IN_HOUR && Constants.RNG.nextFloat() < 0.5f)
-                {
+                if (playerData.getIntoxicatedTime() > 24 * ICalendar.TICKS_IN_HOUR && Constants.RNG.nextFloat() < 0.5f) {
                     player.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 1200, 1));
                 }
             }
@@ -180,8 +163,7 @@ public final class FluidsTFC
                 VINEGAR = registerFluid(new Fluid("vinegar", STILL, FLOW, 0xFFC7C2AA)),
                 BRINE = registerFluid(new Fluid("brine", STILL, FLOW, 0xFFDCD3C9)),
                 MILK = registerFluid(new Fluid("milk", STILL, FLOW, 0xFFFFFFFF)).with(DrinkableProperty.DRINKABLE, player -> {
-                    if (player.getFoodStats() instanceof IFoodStatsTFC)
-                    {
+                    if (player.getFoodStats() instanceof IFoodStatsTFC) {
                         IFoodStatsTFC foodStats = (IFoodStatsTFC) player.getFoodStats();
                         foodStats.addThirst(10);
                         foodStats.getNutrition().addBuff(FoodData.MILK);
@@ -219,17 +201,13 @@ public final class FluidsTFC
     }
 
     @Nonnull
-    private static FluidWrapper registerFluid(@Nonnull Fluid newFluid)
-    {
+    private static FluidWrapper registerFluid(@Nonnull Fluid newFluid) {
         boolean isDefault = !FluidRegistry.isFluidRegistered(newFluid.getName());
 
-        if (!isDefault)
-        {
+        if (!isDefault) {
             // Fluid was already registered with this name, default to that fluid
             newFluid = FluidRegistry.getFluid(newFluid.getName());
-        }
-        else
-        {
+        } else {
             // No fluid found we are safe to register our default
             FluidRegistry.registerFluid(newFluid);
         }

@@ -5,16 +5,15 @@
 
 package net.dries007.tfc.objects;
 
+import net.dries007.tfc.util.collections.WeightedCollection;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import net.dries007.tfc.util.collections.WeightedCollection;
-
-public enum Gem
-{
+public enum Gem {
     AGATE(true),
     AMETHYST(true),
     BERYL(true),
@@ -38,21 +37,18 @@ public enum Gem
      * @param random Random generator for rolling odds
      * @return a random drop gem type
      */
-    public static Gem getRandomDropGem(Random random)
-    {
+    public static Gem getRandomDropGem(Random random) {
         return RANDOM_DROP_GEMS[random.nextInt(RANDOM_DROP_GEMS.length)];
     }
 
     // whether this gem can be found as a drop from raw stone
     private final boolean canDrop;
 
-    Gem(boolean canDrop)
-    {
+    Gem(boolean canDrop) {
         this.canDrop = canDrop;
     }
 
-    public enum Grade
-    {
+    public enum Grade {
         CHIPPED(16),
         FLAWED(8),
         NORMAL(4),
@@ -69,21 +65,18 @@ public enum Gem
          * @return a random drop gem grade
          */
         @Nonnull
-        public static Grade randomGrade(Random random)
-        {
+        public static Grade randomGrade(Random random) {
             return GRADE_ODDS.getRandomEntry(random);
         }
 
         @Nullable
-        public static Grade valueOf(int index)
-        {
+        public static Grade valueOf(int index) {
             return index >= 0 && index < VALUES.length ? VALUES[index] : null;
         }
 
         private final double dropWeight;
 
-        Grade(int dropWeight)
-        {
+        Grade(int dropWeight) {
             this.dropWeight = dropWeight;
         }
     }

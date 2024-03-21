@@ -5,30 +5,26 @@
 
 package net.dries007.tfc.objects.blocks.stone;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import net.dries007.tfc.api.types.Tree;
+import net.dries007.tfc.util.OreDictionaryHelper;
 import net.minecraft.block.BlockPressurePlate;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 
-import net.dries007.tfc.api.types.Tree;
-import net.dries007.tfc.util.OreDictionaryHelper;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BlockWoodPressurePlateTFC extends BlockPressurePlate
-{
+public class BlockWoodPressurePlateTFC extends BlockPressurePlate {
     private static final Map<Tree, BlockWoodPressurePlateTFC> MAP = new HashMap<>();
 
-    public static BlockWoodPressurePlateTFC get(Tree wood)
-    {
+    public static BlockWoodPressurePlateTFC get(Tree wood) {
         return MAP.get(wood);
     }
 
     public final Tree wood;
 
-    public BlockWoodPressurePlateTFC(Tree wood)
-    {
+    public BlockWoodPressurePlateTFC(Tree wood) {
         super(Material.WOOD, Sensitivity.EVERYTHING);
         this.wood = wood;
         if (MAP.put(wood, this) != null) throw new IllegalStateException("There can only be one.");

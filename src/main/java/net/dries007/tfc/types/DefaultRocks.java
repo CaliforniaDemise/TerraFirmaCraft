@@ -5,21 +5,19 @@
 
 package net.dries007.tfc.types;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import net.dries007.tfc.api.registries.TFCRegistryEvent;
 import net.dries007.tfc.api.types.Rock;
 import net.dries007.tfc.api.types.RockCategory;
 import net.dries007.tfc.objects.ToolMaterialsTFC;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 @SuppressWarnings("WeakerAccess")
 @Mod.EventBusSubscriber(modid = MOD_ID)
-public final class DefaultRocks
-{
+public final class DefaultRocks {
     public static final ResourceLocation SEDIMENTARY = new ResourceLocation(MOD_ID, "sedimentary");
     public static final ResourceLocation METAMORPHIC = new ResourceLocation(MOD_ID, "metamorphic");
     public static final ResourceLocation IGNEOUS_INTRUSIVE = new ResourceLocation(MOD_ID, "igneous_intrusive");
@@ -49,8 +47,7 @@ public final class DefaultRocks
 
     @SubscribeEvent
     @SuppressWarnings("ConstantConditions")
-    public static void onPreRegisterRockCategory(TFCRegistryEvent.RegisterPreBlock<RockCategory> event)
-    {
+    public static void onPreRegisterRockCategory(TFCRegistryEvent.RegisterPreBlock<RockCategory> event) {
         event.getRegistry().registerAll(
             new RockCategory(IGNEOUS_INTRUSIVE, ToolMaterialsTFC.IGNEOUS_INTRUSIVE, true, true, true, -0.4f, 0f, 1.6F, 10F, true),
             new RockCategory(IGNEOUS_EXTRUSIVE, ToolMaterialsTFC.IGNEOUS_EXTRUSIVE, true, true, true, -0.5f, 0f, 1.6F, 10F, true),
@@ -60,8 +57,7 @@ public final class DefaultRocks
     }
 
     @SubscribeEvent
-    public static void onPreRegisterRock(TFCRegistryEvent.RegisterPreBlock<Rock> event)
-    {
+    public static void onPreRegisterRock(TFCRegistryEvent.RegisterPreBlock<Rock> event) {
         event.getRegistry().registerAll(
             new Rock(GRANITE, IGNEOUS_INTRUSIVE, false),
             new Rock(DIORITE, IGNEOUS_INTRUSIVE, false),

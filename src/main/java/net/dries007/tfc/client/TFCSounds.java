@@ -17,8 +17,7 @@ import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 import static net.dries007.tfc.util.Helpers.getNull;
 
 @Mod.EventBusSubscriber(modid = MOD_ID)
-public class TFCSounds
-{
+public class TFCSounds {
     @GameRegistry.ObjectHolder(MOD_ID + ":rock.slide.long")
     public static final SoundEvent ROCK_SLIDE_LONG = getNull();
     @GameRegistry.ObjectHolder(MOD_ID + ":rock.slide.short")
@@ -263,8 +262,7 @@ public class TFCSounds
     public static final SoundType CHARCOAL_PILE = new SoundType(1.0F, 1.0F, CHARCOAL_PILE_BREAK, CHARCOAL_PILE_STEP, CHARCOAL_PILE_PLACE, CHARCOAL_PILE_HIT, CHARCOAL_PILE_FALL);
 
     @SubscribeEvent
-    public static void registerSounds(RegistryEvent.Register<SoundEvent> event)
-    {
+    public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
         event.getRegistry().registerAll(
             // Custom block sounds
             CHARCOAL_PILE_BREAK,
@@ -379,8 +377,7 @@ public class TFCSounds
         );
     }
 
-    private static SoundEvent createSoundEvent(String name)
-    {
+    private static SoundEvent createSoundEvent(String name) {
         final ResourceLocation soundID = new ResourceLocation(MOD_ID, name);
         return new SoundEvent(soundID).setRegistryName(soundID);
     }

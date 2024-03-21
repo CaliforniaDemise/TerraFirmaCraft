@@ -5,19 +5,17 @@
 
 package net.dries007.tfc;
 
-import java.util.Random;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.util.ResourceLocation;
-
 import net.dries007.tfc.api.capability.damage.DamageResistance;
 import net.dries007.tfc.objects.entity.animal.AnimalFood;
 import net.dries007.tfc.util.json.*;
 import net.dries007.tfc.world.classic.worldgen.vein.VeinType;
+import net.minecraft.util.ResourceLocation;
 
-public final class Constants
-{
+import java.util.Random;
+
+public final class Constants {
     public static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
         .registerTypeAdapter(ResourceLocation.class, new ResourceLocationJson())
         .registerTypeAdapterFactory(new LowercaseEnumTypeAdapterFactory())

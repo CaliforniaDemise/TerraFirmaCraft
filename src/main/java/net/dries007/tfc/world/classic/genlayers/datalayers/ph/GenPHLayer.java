@@ -11,13 +11,11 @@ import net.dries007.tfc.world.classic.genlayers.GenLayerSmoothTFC;
 import net.dries007.tfc.world.classic.genlayers.GenLayerTFC;
 import net.dries007.tfc.world.classic.genlayers.GenLayerZoomTFC;
 
-public abstract class GenPHLayer extends GenLayerTFC
-{
+public abstract class GenPHLayer extends GenLayerTFC {
     public static final int MIN = DataLayer.PH_ACID_HIGH.layerID;
     public static final int MAX = DataLayer.PH_ALKALINE_HIGH.layerID;
 
-    public static GenLayerTFC initializePH(long seed)
-    {
+    public static GenLayerTFC initializePH(long seed) {
         GenLayerTFC continent = new GenLayerPHInit(1L);
         continent = new GenLayerAddPH(1L, continent);
         continent = new GenLayerFuzzyZoomTFC(2000L, continent);
@@ -39,8 +37,7 @@ public abstract class GenPHLayer extends GenLayerTFC
         return continent;
     }
 
-    public GenPHLayer(long par1)
-    {
+    public GenPHLayer(long par1) {
         super(par1);
     }
 }

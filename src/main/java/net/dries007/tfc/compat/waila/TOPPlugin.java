@@ -5,18 +5,17 @@
 
 package net.dries007.tfc.compat.waila;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-
 import mcjty.theoneprobe.api.ITheOneProbe;
 import net.dries007.tfc.compat.waila.interfaces.TOPBlockInterface;
 import net.dries007.tfc.compat.waila.interfaces.TOPEntityInterface;
 import net.dries007.tfc.compat.waila.providers.*;
 
-public class TOPPlugin implements Function<ITheOneProbe, Void>
-{
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
+public class TOPPlugin implements Function<ITheOneProbe, Void> {
     public static final List<TOPBlockInterface> TOP_BLOCK_INTERFACES = Arrays.asList(
         new TOPBlockInterface(new BarrelProvider()),
         new TOPBlockInterface(new BerryBushProvider()),
@@ -41,21 +40,16 @@ public class TOPPlugin implements Function<ITheOneProbe, Void>
     );
 
     @Override
-    public Void apply(ITheOneProbe probe)
-    {
-        for (TOPBlockInterface blockInterface : TOP_BLOCK_INTERFACES)
-        {
+    public Void apply(ITheOneProbe probe) {
+        for (TOPBlockInterface blockInterface : TOP_BLOCK_INTERFACES) {
             probe.registerProvider(blockInterface);
-            if (blockInterface.overridesHeadInfo())
-            {
+            if (blockInterface.overridesHeadInfo()) {
                 probe.registerBlockDisplayOverride(blockInterface);
             }
         }
-        for (TOPEntityInterface entityInterface : TOP_ENTITY_INTERFACES)
-        {
+        for (TOPEntityInterface entityInterface : TOP_ENTITY_INTERFACES) {
             probe.registerEntityProvider(entityInterface);
-            if (entityInterface.overridesHeadInfo())
-            {
+            if (entityInterface.overridesHeadInfo()) {
                 probe.registerEntityDisplayOverride(entityInterface);
             }
         }

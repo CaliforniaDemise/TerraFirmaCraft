@@ -40,8 +40,7 @@ import static net.minecraft.block.BlockHorizontal.FACING;
 import static net.minecraft.block.material.Material.WOOD;
 
 @ParametersAreNonnullByDefault
-public class BlockToolRack extends Block implements IItemSize
-{
+public class BlockToolRack extends Block implements IItemSize {
     protected static final AxisAlignedBB RACK_EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
     protected static final AxisAlignedBB RACK_WEST_AABB = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     protected static final AxisAlignedBB RACK_SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
@@ -49,8 +48,7 @@ public class BlockToolRack extends Block implements IItemSize
 
     public final Tree wood;
 
-    public BlockToolRack(Tree wood)
-    {
+    public BlockToolRack(Tree wood) {
         super(WOOD, MapColor.AIR);
         this.wood = wood;
         setSoundType(SoundType.WOOD);
@@ -62,54 +60,46 @@ public class BlockToolRack extends Block implements IItemSize
 
     @Nonnull
     @Override
-    public Size getSize(@Nonnull ItemStack stack)
-    {
+    public Size getSize(@Nonnull ItemStack stack) {
         return Size.LARGE; // Stored only in chests
     }
 
     @Nonnull
     @Override
-    public Weight getWeight(@Nonnull ItemStack stack)
-    {
+    public Weight getWeight(@Nonnull ItemStack stack) {
         return Weight.VERY_HEAVY; // Stacksize = 1
     }
 
     @Override
     @SuppressWarnings("deprecation")
     @Nonnull
-    public IBlockState getStateFromMeta(int meta)
-    {
+    public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(FACING, EnumFacing.byHorizontalIndex(meta));
     }
 
     @Override
-    public int getMetaFromState(IBlockState state)
-    {
+    public int getMetaFromState(IBlockState state) {
         return state.getValue(FACING).getHorizontalIndex();
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean isFullCube(IBlockState state)
-    {
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 
     @Override
     @SuppressWarnings("deprecation")
     @Nonnull
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
+    public EnumBlockRenderType getRenderType(IBlockState state) {
         return EnumBlockRenderType.MODEL;
     }
 
     @Override
     @SuppressWarnings("deprecation")
     @Nonnull
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        switch (state.getValue(FACING))
-        {
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        switch (state.getValue(FACING)) {
             case NORTH:
             default:
                 return RACK_NORTH_AABB;
@@ -125,29 +115,24 @@ public class BlockToolRack extends Block implements IItemSize
     @Override
     @SuppressWarnings("deprecation")
     @Nonnull
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face)
-    {
+    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
         return BlockFaceShape.UNDEFINED;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean isOpaqueCube(IBlockState state)
-    {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
-    {
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
-        if (!Helpers.canHangAt(worldIn, pos, state.getValue(FACING)))
-        {
+        if (!Helpers.canHangAt(worldIn, pos, state.getValue(FACING))) {
             dropBlockAsItem(worldIn, pos, state, 0);
             TEToolRack te = Helpers.getTE(worldIn, pos, TEToolRack.class);
-            if (te != null)
-            {
+            if (te != null) {
                 te.onBreakBlock();
             }
             worldIn.setBlockToAir(pos);
@@ -155,29 +140,23 @@ public class BlockToolRack extends Block implements IItemSize
     }
 
     @Override
-    public void breakBlock(World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state)
-    {
+    public void breakBlock(World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         TEToolRack te = Helpers.getTE(worldIn, pos, TEToolRack.class);
-        if (te != null)
-        {
+        if (te != null) {
             te.onBreakBlock();
         }
         super.breakBlock(worldIn, pos, state);
     }
 
     @Override
-    public boolean canPlaceBlockAt(World worldIn, @Nonnull BlockPos pos)
-    {
+    public boolean canPlaceBlockAt(World worldIn, @Nonnull BlockPos pos) {
         return super.canPlaceBlockAt(worldIn, pos) && Helpers.getASolidFacing(worldIn, pos, null, EnumFacing.HORIZONTALS) != null;
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
-    {
-        if (!worldIn.isRemote)
-        {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!worldIn.isRemote) {
             TEToolRack te = Helpers.getTE(worldIn, pos, TEToolRack.class);
-            if (te != null)
-            {
+            if (te != null) {
                 return te.onRightClick(playerIn, hand, getSlotFromPos(state, hitX, hitY, hitZ));
             }
         }
@@ -187,10 +166,8 @@ public class BlockToolRack extends Block implements IItemSize
     @Override
     @SuppressWarnings("deprecation")
     @Nonnull
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
-        if (facing.getAxis() == EnumFacing.Axis.Y)
-        {
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+        if (facing.getAxis() == EnumFacing.Axis.Y) {
             facing = placer.getHorizontalFacing().getOpposite();
         }
         return this.getDefaultState().withProperty(FACING, Helpers.getASolidFacing(worldIn, pos, facing, EnumFacing.HORIZONTALS));
@@ -198,38 +175,31 @@ public class BlockToolRack extends Block implements IItemSize
 
     @Override
     @Nonnull
-    protected BlockStateContainer createBlockState()
-    {
+    protected BlockStateContainer createBlockState() {
         return new BlockStateContainer(this, FACING);
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state)
-    {
+    public boolean hasTileEntity(IBlockState state) {
         return true;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state)
-    {
+    public TileEntity createTileEntity(World world, IBlockState state) {
         return new TEToolRack();
     }
 
     @Override
     @Nonnull
     @SuppressWarnings("ConstantConditions")
-    public ItemStack getPickBlock(IBlockState state, @Nullable RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
-    {
-        if (target != null)
-        {
+    public ItemStack getPickBlock(IBlockState state, @Nullable RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        if (target != null) {
             Vec3d vec = target.hitVec.subtract(pos.getX(), pos.getY(), pos.getZ());
             TEToolRack te = Helpers.getTE(world, pos, TEToolRack.class);
-            if (te != null)
-            {
+            if (te != null) {
                 ItemStack item = te.getItems().get(getSlotFromPos(state, (float) vec.x, (float) vec.y, (float) vec.z));
-                if (!item.isEmpty())
-                {
+                if (!item.isEmpty()) {
                     return item;
                 }
             }
@@ -237,15 +207,12 @@ public class BlockToolRack extends Block implements IItemSize
         return super.getPickBlock(state, target, world, pos, player);
     }
 
-    public int getSlotFromPos(IBlockState state, float x, float y, float z)
-    {
+    public int getSlotFromPos(IBlockState state, float x, float y, float z) {
         int slot = 0;
-        if ((state.getValue(FACING).getAxis().equals(EnumFacing.Axis.Z) ? x : z) > .5f)
-        {
+        if ((state.getValue(FACING).getAxis().equals(EnumFacing.Axis.Z) ? x : z) > .5f) {
             slot += 1;
         }
-        if (y < 0.5f)
-        {
+        if (y < 0.5f) {
             slot += 2;
         }
         return slot;

@@ -5,21 +5,19 @@
 
 package net.dries007.tfc.types;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import net.dries007.tfc.api.registries.TFCRegistryEvent;
 import net.dries007.tfc.api.types.Tree;
 import net.dries007.tfc.api.util.ITreeGenerator;
 import net.dries007.tfc.world.classic.worldgen.trees.*;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 @SuppressWarnings("WeakerAccess")
 @Mod.EventBusSubscriber(modid = MOD_ID)
-public final class DefaultTrees
-{
+public final class DefaultTrees {
     /**
      * Default Tree ResourceLocations
      */
@@ -59,8 +57,7 @@ public final class DefaultTrees
     public static final ITreeGenerator GEN_BUSHES = new TreeGenBushes();
 
     @SubscribeEvent
-    public static void onPreRegisterRockCategory(TFCRegistryEvent.RegisterPreBlock<Tree> event)
-    {
+    public static void onPreRegisterRockCategory(TFCRegistryEvent.RegisterPreBlock<Tree> event) {
         event.getRegistry().registerAll(
             new Tree.Builder(ACACIA, 30f, 210f, 19f, 31f, GEN_ACACIA).setHeight(12).setGrowthTime(11).setDensity(0.1f, 0.6f).setBurnInfo(650f, 1000).build(),
             new Tree.Builder(ASH, 60f, 140f, -6f, 12f, GEN_NORMAL).setBurnInfo(696f, 1250).build(),

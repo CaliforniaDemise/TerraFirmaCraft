@@ -5,23 +5,6 @@
 
 package net.dries007.tfc.types;
 
-import java.util.Arrays;
-import javax.annotation.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.registries.IForgeRegistry;
-
 import net.dries007.tfc.api.capability.forge.CapabilityForgeable;
 import net.dries007.tfc.api.capability.forge.IForgeable;
 import net.dries007.tfc.api.capability.forge.IForgeableMeasurableMetal;
@@ -71,6 +54,22 @@ import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.forge.ForgeRule;
 import net.dries007.tfc.util.fuel.FuelManager;
 import net.dries007.tfc.util.skills.SmithingSkill;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.registries.IForgeRegistry;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 import static net.dries007.tfc.api.types.Metal.ItemType.*;
@@ -84,11 +83,9 @@ import static net.dries007.tfc.util.skills.SmithingSkill.Type.*;
  */
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(modid = MOD_ID)
-public final class DefaultRecipes
-{
+public final class DefaultRecipes {
     @SubscribeEvent
-    public static void onRegisterBarrelRecipeEvent(RegistryEvent.Register<BarrelRecipe> event)
-    {
+    public static void onRegisterBarrelRecipeEvent(RegistryEvent.Register<BarrelRecipe> event) {
         event.getRegistry().registerAll(
             // Hide Processing (all three conversions)
             new BarrelRecipe(IIngredient.of(FRESH_WATER.get(), 300), IIngredient.of(ItemAnimalHide.get(ItemAnimalHide.HideType.SCRAPED, ItemAnimalHide.HideSize.SMALL)), null, new ItemStack(ItemAnimalHide.get(ItemAnimalHide.HideType.PREPARED, ItemAnimalHide.HideSize.SMALL)), 8 * ICalendar.TICKS_IN_HOUR).setRegistryName("small_prepared_hide"),
@@ -152,14 +149,12 @@ public final class DefaultRecipes
             new BarrelRecipeTemperature(IIngredient.of(SALT_WATER.get(), 1), 50).setRegistryName("salt_water_cooling")
         );
 
-        for (Food food : new Food[] {Food.SALAD_DAIRY, Food.SALAD_FRUIT, Food.SALAD_GRAIN, Food.SALAD_MEAT, Food.SALAD_VEGETABLE, Food.SOUP_DAIRY, Food.SOUP_FRUIT, Food.SOUP_GRAIN, Food.SOUP_MEAT, Food.SOUP_VEGETABLE})
-        {
+        for (Food food : new Food[]{Food.SALAD_DAIRY, Food.SALAD_FRUIT, Food.SALAD_GRAIN, Food.SALAD_MEAT, Food.SALAD_VEGETABLE, Food.SOUP_DAIRY, Food.SOUP_FRUIT, Food.SOUP_GRAIN, Food.SOUP_MEAT, Food.SOUP_VEGETABLE}) {
             event.getRegistry().register(new BarrelRecipeDynamicBowlFood(IIngredient.of(FRESH_WATER.get(), 200), IIngredient.of(ItemFoodTFC.get(food)), 0).setRegistryName(food.name().toLowerCase() + "_cleaning"));
         }
 
         //The many many many recipes that is dye. This assumes that the standard meta values for colored objects are followed.
-        for (EnumDyeColor dyeColor : EnumDyeColor.values())
-        {
+        for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
             Fluid fluid = FluidsTFC.getFluidFromDye(dyeColor).get();
             String dyeName = dyeColor == EnumDyeColor.SILVER ? "light_gray" : dyeColor.getName();
             int dyeMeta = dyeColor.getMetadata();
@@ -255,12 +250,10 @@ public final class DefaultRecipes
     }
 
     @SubscribeEvent
-    public static void onRegisterKnappingRecipeEvent(RegistryEvent.Register<KnappingRecipe> event)
-    {
+    public static void onRegisterKnappingRecipeEvent(RegistryEvent.Register<KnappingRecipe> event) {
         /* STONE TOOL HEADS */
 
-        for (Rock.ToolType type : Rock.ToolType.values())
-        {
+        for (Rock.ToolType type : Rock.ToolType.values()) {
             // This covers all stone -> single tool head recipes
             KnappingRecipe r = new KnappingRecipeStone(KnappingType.STONE, rockIn -> new ItemStack(ItemRockToolHead.get(rockIn.getRockCategory(), type)), type.getPattern());
             event.getRegistry().register(r.setRegistryName(type.name().toLowerCase() + "_head"));
@@ -277,10 +270,8 @@ public final class DefaultRecipes
 
         /* CLAY ITEMS */
 
-        for (Metal.ItemType type : Metal.ItemType.values())
-        {
-            if (type.hasMold(null))
-            {
+        for (Metal.ItemType type : Metal.ItemType.values()) {
+            if (type.hasMold(null)) {
                 int amount = type == INGOT ? 2 : 1;
                 event.getRegistry().register(new KnappingRecipeSimple(KnappingType.CLAY, true, new ItemStack(ItemUnfiredMold.get(type), amount), type.getPattern()).setRegistryName(type.name().toLowerCase() + "_mold"));
             }
@@ -318,47 +309,40 @@ public final class DefaultRecipes
     }
 
     @SubscribeEvent
-    public static void onRegisterBloomeryRecipeEvent(RegistryEvent.Register<BloomeryRecipe> event)
-    {
+    public static void onRegisterBloomeryRecipeEvent(RegistryEvent.Register<BloomeryRecipe> event) {
         event.getRegistry().registerAll(
             new BloomeryRecipe(Metal.WROUGHT_IRON, FuelManager::isItemBloomeryFuel)
         );
     }
 
     @SubscribeEvent
-    public static void onRegisterBlastFurnaceRecipeEvent(RegistryEvent.Register<BlastFurnaceRecipe> event)
-    {
+    public static void onRegisterBlastFurnaceRecipeEvent(RegistryEvent.Register<BlastFurnaceRecipe> event) {
         event.getRegistry().registerAll(
             new BlastFurnaceRecipe(Metal.PIG_IRON, Metal.WROUGHT_IRON, IIngredient.of("dustFlux"))
         );
     }
 
     @SubscribeEvent
-    public static void onRegisterHeatRecipeEvent(RegistryEvent.Register<HeatRecipe> event)
-    {
+    public static void onRegisterHeatRecipeEvent(RegistryEvent.Register<HeatRecipe> event) {
         IForgeRegistry<HeatRecipe> r = event.getRegistry();
 
-        for (Metal metal : TFCRegistries.METALS.getValuesCollection())
-        {
+        for (Metal metal : TFCRegistries.METALS.getValuesCollection()) {
             //noinspection ConstantConditions
             r.register(new HeatRecipeMetalMelting(metal).setRegistryName(metal.getRegistryName().getPath() + "_melting"));
         }
 
         // Pottery Items with metadata
-        for (EnumDyeColor dye : EnumDyeColor.values())
-        {
+        for (EnumDyeColor dye : EnumDyeColor.values()) {
             r.register(
                 new HeatRecipeSimple(IIngredient.of(new ItemStack(ItemsTFC.UNFIRED_VESSEL_GLAZED, 1, dye.getMetadata())), new ItemStack(ItemsTFC.FIRED_VESSEL_GLAZED, 1, dye.getMetadata()), 1599f, Metal.Tier.TIER_I).setRegistryName("unfired_vessel_glazed_" + dye.getName())
             );
         }
 
         // Molds
-        for (Metal.ItemType type : Metal.ItemType.values())
-        {
+        for (Metal.ItemType type : Metal.ItemType.values()) {
             ItemUnfiredMold unfiredMold = ItemUnfiredMold.get(type);
             ItemMold firedMold = ItemMold.get(type);
-            if (unfiredMold != null && firedMold != null)
-            {
+            if (unfiredMold != null && firedMold != null) {
                 r.register(new HeatRecipeSimple(IIngredient.of(unfiredMold), new ItemStack(firedMold), 1599f, Metal.Tier.TIER_I).setRegistryName("fired_mold_" + type.name().toLowerCase()));
             }
         }
@@ -471,8 +455,7 @@ public final class DefaultRecipes
     }
 
     @SubscribeEvent
-    public static void onRegisterAnvilRecipeEvent(RegistryEvent.Register<AnvilRecipe> event)
-    {
+    public static void onRegisterAnvilRecipeEvent(RegistryEvent.Register<AnvilRecipe> event) {
         IForgeRegistry<AnvilRecipe> r = event.getRegistry();
 
         // Misc
@@ -506,11 +489,9 @@ public final class DefaultRecipes
         r.register(new AnvilRecipeMeasurable(new ResourceLocation(MOD_ID, "refining_bloom"), IIngredient.of(ItemsTFC.UNREFINED_BLOOM), new ItemStack(ItemsTFC.REFINED_BLOOM), Metal.Tier.TIER_II, HIT_LAST, HIT_SECOND_LAST, HIT_THIRD_LAST));
         r.register(new AnvilRecipeSplitting(new ResourceLocation(MOD_ID, "splitting_bloom"), IIngredient.of(ItemsTFC.REFINED_BLOOM), new ItemStack(ItemsTFC.REFINED_BLOOM), 100, Metal.Tier.TIER_II, PUNCH_LAST));
         r.register(new AnvilRecipe(new ResourceLocation(MOD_ID, "iron_bloom"), x -> {
-            if (x.getItem() == ItemsTFC.REFINED_BLOOM)
-            {
+            if (x.getItem() == ItemsTFC.REFINED_BLOOM) {
                 IForgeable cap = x.getCapability(CapabilityForgeable.FORGEABLE_CAPABILITY, null);
-                if (cap instanceof IForgeableMeasurableMetal)
-                {
+                if (cap instanceof IForgeableMeasurableMetal) {
                     return ((IForgeableMeasurableMetal) cap).getMetal() == Metal.WROUGHT_IRON && ((IForgeableMeasurableMetal) cap).getMetalAmount() == 100;
                 }
             }
@@ -545,8 +526,7 @@ public final class DefaultRecipes
     }
 
     @SubscribeEvent
-    public static void onRegisterWeldingRecipeEvent(RegistryEvent.Register<WeldingRecipe> event)
-    {
+    public static void onRegisterWeldingRecipeEvent(RegistryEvent.Register<WeldingRecipe> event) {
         IForgeRegistry<WeldingRecipe> r = event.getRegistry();
 
         // Basic Parts
@@ -569,8 +549,7 @@ public final class DefaultRecipes
     }
 
     @SubscribeEvent
-    public static void onRegisterLoomRecipeEvent(RegistryEvent.Register<LoomRecipe> event)
-    {
+    public static void onRegisterLoomRecipeEvent(RegistryEvent.Register<LoomRecipe> event) {
         IForgeRegistry<LoomRecipe> r = event.getRegistry();
 
         r.registerAll(
@@ -584,8 +563,7 @@ public final class DefaultRecipes
 
     @SubscribeEvent
     @SuppressWarnings("ConstantConditions")
-    public static void onRegisterQuernRecipeEvent(RegistryEvent.Register<QuernRecipe> event)
-    {
+    public static void onRegisterQuernRecipeEvent(RegistryEvent.Register<QuernRecipe> event) {
         IForgeRegistry<QuernRecipe> r = event.getRegistry();
 
         r.registerAll(
@@ -710,19 +688,16 @@ public final class DefaultRecipes
 
     @SubscribeEvent
     @SuppressWarnings("ConstantConditions")
-    public static void onRegisterChiselRecipeEvent(RegistryEvent.Register<ChiselRecipe> event)
-    {
+    public static void onRegisterChiselRecipeEvent(RegistryEvent.Register<ChiselRecipe> event) {
         // Rock smoothing
-        for (Rock rock : TFCRegistries.ROCKS.getValuesCollection())
-        {
+        for (Rock rock : TFCRegistries.ROCKS.getValuesCollection()) {
             Block rawRock = BlockRockVariant.get(rock, Rock.Type.RAW);
             IBlockState smoothRock = BlockRockVariant.get(rock, Rock.Type.SMOOTH).getDefaultState();
             event.getRegistry().register(new ChiselRecipe(rawRock, smoothRock).setRegistryName("smooth_" + rock.getRegistryName().getPath()));
         }
 
         // Alabaster smoothing
-        for (EnumDyeColor color : EnumDyeColor.values())
-        {
+        for (EnumDyeColor color : EnumDyeColor.values()) {
             Block rawColoredAlabaster = BlockDecorativeStone.ALABASTER_RAW.get(color);
             IBlockState smoothColoredAlabaster = BlockDecorativeStone.ALABASTER_POLISHED.get(color).getDefaultState();
             event.getRegistry().register(new ChiselRecipe(rawColoredAlabaster, smoothColoredAlabaster).setRegistryName("smooth_" + color.getName() + "_alabaster"));
@@ -731,11 +706,9 @@ public final class DefaultRecipes
         event.getRegistry().register(new ChiselRecipe(BlocksTFC.ALABASTER_RAW_PLAIN, BlocksTFC.ALABASTER_POLISHED_PLAIN.getDefaultState()).setRegistryName("smooth_alabaster"));
     }
 
-    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, Metal.ItemType inputType, Metal.ItemType outputType, boolean onlyToolMetals, @Nullable SmithingSkill.Type skillType, ForgeRule... rules)
-    {
+    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, Metal.ItemType inputType, Metal.ItemType outputType, boolean onlyToolMetals, @Nullable SmithingSkill.Type skillType, ForgeRule... rules) {
         // Helper method for adding all recipes that take ItemType -> ItemType
-        for (Metal metal : TFCRegistries.METALS.getValuesCollection())
-        {
+        for (Metal metal : TFCRegistries.METALS.getValuesCollection()) {
             if (onlyToolMetals && !metal.isToolMetal())
                 continue;
 
@@ -744,31 +717,23 @@ public final class DefaultRecipes
             if (!inputType.isToolItem()) //Since tools don't have specific ore tags anymore
             {
                 String oreDictEntry;
-                if (inputType == Metal.ItemType.DOUBLE_INGOT)
-                {
+                if (inputType == Metal.ItemType.DOUBLE_INGOT) {
                     //noinspection ConstantConditions
                     oreDictEntry = OreDictionaryHelper.toString("ingot", "double", metal.getRegistryName().getPath());
-                }
-                else if (inputType == Metal.ItemType.DOUBLE_SHEET)
-                {
+                } else if (inputType == Metal.ItemType.DOUBLE_SHEET) {
                     //noinspection ConstantConditions
                     oreDictEntry = OreDictionaryHelper.toString("sheet", "double", metal.getRegistryName().getPath());
-                }
-                else
-                {
+                } else {
                     //noinspection ConstantConditions
                     oreDictEntry = OreDictionaryHelper.toString(inputType, metal.getRegistryName().getPath());
                 }
                 ingredient = IIngredient.of(oreDictEntry);
-            }
-            else
-            {
+            } else {
                 ingredient = IIngredient.of(new ItemStack(ItemMetal.get(metal, inputType)));
             }
 
             ItemStack output = new ItemStack(ItemMetal.get(metal, outputType));
-            if (!output.isEmpty())
-            {
+            if (!output.isEmpty()) {
                 //noinspection ConstantConditions
                 registry.register(new AnvilRecipe(new ResourceLocation(MOD_ID, (outputType.name() + "_" + metal.getRegistryName().getPath()).toLowerCase()), ingredient, output, metal.getTier(), skillType, rules));
             }
@@ -776,17 +741,14 @@ public final class DefaultRecipes
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, ResourceLocation inputMetalLoc, ResourceLocation outputMetalLoc, @Nullable SmithingSkill.Type skillType)
-    {
+    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, ResourceLocation inputMetalLoc, ResourceLocation outputMetalLoc, @Nullable SmithingSkill.Type skillType) {
         // Helper method for adding INGOT -> INGOT with different metal working
         Metal inputMetal = TFCRegistries.METALS.getValue(inputMetalLoc);
         Metal outputMetal = TFCRegistries.METALS.getValue(outputMetalLoc);
-        if (inputMetal != null && outputMetal != null)
-        {
+        if (inputMetal != null && outputMetal != null) {
             ItemStack input = new ItemStack(ItemMetal.get(inputMetal, INGOT));
             ItemStack output = new ItemStack(ItemMetal.get(outputMetal, INGOT));
-            if (!input.isEmpty() && !output.isEmpty())
-            {
+            if (!input.isEmpty() && !output.isEmpty()) {
                 //noinspection ConstantConditions
                 registry.register(new AnvilRecipe(new ResourceLocation(MOD_ID, ("ingot_" + outputMetal.getRegistryName().getPath()).toLowerCase()), IIngredient.of(input), output, inputMetal.getTier(), skillType, HIT_LAST, HIT_SECOND_LAST, HIT_THIRD_LAST));
             }
@@ -794,31 +756,25 @@ public final class DefaultRecipes
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, String recipeName, Metal.ItemType inputType, ResourceLocation inputMetalRes, ItemStack output, Metal.Tier tier, @Nullable SmithingSkill.Type skillType, ForgeRule... rules)
-    {
+    private static void addAnvil(IForgeRegistry<AnvilRecipe> registry, String recipeName, Metal.ItemType inputType, ResourceLocation inputMetalRes, ItemStack output, Metal.Tier tier, @Nullable SmithingSkill.Type skillType, ForgeRule... rules) {
         // Helper method for adding METAL -> STACK
         Metal inputMetal = TFCRegistries.METALS.getValue(inputMetalRes);
-        if (inputMetal != null && !output.isEmpty())
-        {
+        if (inputMetal != null && !output.isEmpty()) {
             ItemStack input = new ItemStack(ItemMetal.get(inputMetal, inputType));
-            if (!input.isEmpty() && !output.isEmpty())
-            {
+            if (!input.isEmpty() && !output.isEmpty()) {
                 registry.register(new AnvilRecipe(new ResourceLocation(MOD_ID, recipeName), IIngredient.of(input), output, tier, skillType, rules));
             }
         }
     }
 
-    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, Metal.ItemType inputType, Metal.ItemType outputType, SmithingSkill.Type skillType)
-    {
+    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, Metal.ItemType inputType, Metal.ItemType outputType, SmithingSkill.Type skillType) {
         addWelding(registry, inputType, inputType, outputType, false, skillType);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, Metal.ItemType inputType1, Metal.ItemType inputType2, Metal.ItemType outputType, boolean onlyToolMetals, SmithingSkill.Type skillType)
-    {
+    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, Metal.ItemType inputType1, Metal.ItemType inputType2, Metal.ItemType outputType, boolean onlyToolMetals, SmithingSkill.Type skillType) {
         // Helper method for adding all recipes that take ItemType -> ItemType
-        for (Metal metal : TFCRegistries.METALS.getValuesCollection())
-        {
+        for (Metal metal : TFCRegistries.METALS.getValuesCollection()) {
             if (onlyToolMetals && !metal.isToolMetal())
                 continue;
 
@@ -827,69 +783,50 @@ public final class DefaultRecipes
             if (!inputType1.isToolItem()) //Since tools don't have specific ore tags anymore
             {
                 String oreDictEntry;
-                if (inputType1 == Metal.ItemType.DOUBLE_INGOT)
-                {
+                if (inputType1 == Metal.ItemType.DOUBLE_INGOT) {
                     oreDictEntry = OreDictionaryHelper.toString("ingot", "double", metal.getRegistryName().getPath());
-                }
-                else if (inputType1 == Metal.ItemType.DOUBLE_SHEET)
-                {
+                } else if (inputType1 == Metal.ItemType.DOUBLE_SHEET) {
                     oreDictEntry = OreDictionaryHelper.toString("sheet", "double", metal.getRegistryName().getPath());
-                }
-                else
-                {
+                } else {
                     oreDictEntry = OreDictionaryHelper.toString(inputType1, metal.getRegistryName().getPath());
                 }
                 ingredient1 = IIngredient.of(oreDictEntry);
-            }
-            else
-            {
+            } else {
                 ingredient1 = IIngredient.of(new ItemStack(ItemMetal.get(metal, inputType1)));
             }
 
-            if (!inputType2.isToolItem())
-            {
+            if (!inputType2.isToolItem()) {
                 String oreDictEntry;
-                if (inputType2 == Metal.ItemType.DOUBLE_INGOT)
-                {
+                if (inputType2 == Metal.ItemType.DOUBLE_INGOT) {
                     oreDictEntry = OreDictionaryHelper.toString("ingot", "double", metal.getRegistryName().getPath());
-                }
-                else if (inputType2 == Metal.ItemType.DOUBLE_SHEET)
-                {
+                } else if (inputType2 == Metal.ItemType.DOUBLE_SHEET) {
                     oreDictEntry = OreDictionaryHelper.toString("sheet", "double", metal.getRegistryName().getPath());
-                }
-                else
-                {
+                } else {
                     oreDictEntry = OreDictionaryHelper.toString(inputType2, metal.getRegistryName().getPath());
                 }
                 ingredient2 = IIngredient.of(oreDictEntry);
-            }
-            else
-            {
+            } else {
                 ingredient2 = IIngredient.of(new ItemStack(ItemMetal.get(metal, inputType2)));
             }
 
             ItemStack output = new ItemStack(outputType.isArmor() ? ItemMetalArmor.get(metal, outputType) : ItemMetal.get(metal, outputType));
-            if (!output.isEmpty())
-            {
+            if (!output.isEmpty()) {
                 // Note: Welding recipes require one less than the tier of the metal
                 registry.register(new WeldingRecipe(new ResourceLocation(MOD_ID, (outputType.name() + "_" + metal.getRegistryName().getPath()).toLowerCase()), ingredient1, ingredient2, output, metal.getTier().previous(), skillType));
             }
         }
     }
 
-    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, ResourceLocation input1Loc, ResourceLocation input2Loc, ResourceLocation outputLoc)
-    {
+    private static void addWelding(IForgeRegistry<WeldingRecipe> registry, ResourceLocation input1Loc, ResourceLocation input2Loc, ResourceLocation outputLoc) {
         Metal inputMetal1 = TFCRegistries.METALS.getValue(input1Loc);
         Metal inputMetal2 = TFCRegistries.METALS.getValue(input2Loc);
         Metal outputMetal = TFCRegistries.METALS.getValue(outputLoc);
-        if (inputMetal1 != null && inputMetal2 != null && outputMetal != null)
-        {
+        if (inputMetal1 != null && inputMetal2 != null && outputMetal != null) {
             // Create a recipe for each metal / item type combination
             ItemStack input1 = new ItemStack(ItemMetal.get(inputMetal1, INGOT));
             ItemStack input2 = new ItemStack(ItemMetal.get(inputMetal2, INGOT));
             ItemStack output = new ItemStack(ItemMetal.get(outputMetal, INGOT));
-            if (!input1.isEmpty() && !input2.isEmpty() && !output.isEmpty())
-            {
+            if (!input1.isEmpty() && !input2.isEmpty() && !output.isEmpty()) {
                 // Note: Welding recipes require one less than the tier of the metal
                 //noinspection ConstantConditions
                 registry.register(new WeldingRecipe(new ResourceLocation(MOD_ID, ("ingot_" + outputMetal.getRegistryName().getPath()).toLowerCase()), IIngredient.of(input1), IIngredient.of(input2), output, outputMetal.getTier().previous(), null));
