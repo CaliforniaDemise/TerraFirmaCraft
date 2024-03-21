@@ -7,6 +7,10 @@ This project is the official port of TerraFirmaCraft (the original, also called 
 
 You can find the mod on [Curseforge](https://www.curseforge.com/minecraft/mc-mods/tfcraft), or stay updated by joining our [Discord](https://invite.gg/terrafirmacraft), and see documentation on the [Wiki](https://tng.terrafirmacraft.com/Main_Page).
 
+## About Fork
+
+A fork that removes everything that already exists in MC and use MC's counterparts
+
 ## Goal
 
 - The ultimate goal of this project is to be **the** TerraFirmaCraft for 1.12+, not a mere partial imitation.
