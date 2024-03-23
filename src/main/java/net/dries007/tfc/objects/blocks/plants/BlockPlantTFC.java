@@ -57,7 +57,7 @@ public class BlockPlantTFC extends BlockBush implements IItemSize {
      * 2 = noon-dusk
      * 3 = dusk-midnight
      */
-    public final static PropertyInteger DAYPERIOD = PropertyInteger.create("dayperiod", 0, 3);
+    public static final PropertyInteger DAYPERIOD = PropertyInteger.create("dayperiod", 0, 3);
     private static final AxisAlignedBB PLANT_AABB = new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 1.0D, 0.875D);
     private static final Map<Plant, BlockPlantTFC> MAP = new HashMap<>();
 
@@ -130,11 +130,6 @@ public class BlockPlantTFC extends BlockBush implements IItemSize {
     }
 
     @Override
-    public int tickRate(World worldIn) {
-        return 10;
-    }
-
-    @Override
     public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
         world.setBlockState(pos, state.withProperty(DAYPERIOD, getDayPeriod()).withProperty(growthStageProperty, plant.getStageForMonth()));
         checkAndDropBlock(world, pos, state);
@@ -203,7 +198,7 @@ public class BlockPlantTFC extends BlockBush implements IItemSize {
             case TALL_REED_SEA:
             case SHORT_GRASS:
             case TALL_GRASS:
-                return (stack.getItem().getHarvestLevel(stack, "knife", player, state) != -1 || stack.getItem().getHarvestLevel(stack, "scythe", player, state) != -1);
+                return (stack.getItem().getHarvestLevel(stack, "knife", player, state) != -1 || stack.getItem().getHarvestLevel(stack, "scythe", player, state) != -1 || stack.getItem().getHarvestLevel(stack, "shears", player, state) != -1);
             default:
                 return true;
         }

@@ -11,7 +11,6 @@ import net.dries007.tfc.api.types.Rock;
 import net.dries007.tfc.api.util.FallingBlockManager;
 import net.dries007.tfc.objects.Gem;
 import net.dries007.tfc.objects.items.ItemGem;
-import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.OreDictionaryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
@@ -31,20 +30,22 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BlockRockRaw extends BlockRockVariant {
+
     /* This is for the not-surrounded-on-all-sides-pop-off mechanic. It's a dirty fix to the stack overflow caused by placement during water / lava collisions in world gen */
     public static final PropertyBool CAN_FALL = PropertyBool.create("can_fall");
 
     public BlockRockRaw(Rock.Type type, Rock rock) {
         super(type, rock);
 
+        assert type.getFallingSpecification() != null;
         FallingBlockManager.Specification spec = new FallingBlockManager.Specification(type.getFallingSpecification()); // Copy as each raw stone has an unique resultingState
         FallingBlockManager.registerFallable(this, spec);
 
         setDefaultState(getBlockState().getBaseState().withProperty(CAN_FALL, true));
     }
 
-    @Override
     @SuppressWarnings("deprecation")
+    @Override
     public IBlockState getStateFromMeta(int meta) {
         return getDefaultState().withProperty(CAN_FALL, meta == 0);
     }
@@ -72,9 +73,8 @@ public class BlockRockRaw extends BlockRockVariant {
                 }
             }
 
-            // No supporting solid blocks, so pop off as an item
-            worldIn.setBlockToAir(pos);
-            Helpers.spawnItemStack(worldIn, pos, new ItemStack(state.getBlock(), 1));
+            // No supporting solid blocks, so turn it into cobblestone
+            worldIn.setBlockState(pos, BlockRockVariant.get(this.rock, Rock.Type.COBBLE).getDefaultState());
         }
     }
 
@@ -85,9 +85,7 @@ public class BlockRockRaw extends BlockRockVariant {
             if (!worldIn.isRemote) {
                 // Create a stone anvil
                 BlockRockVariant anvil = BlockRockVariant.get(this.rock, Rock.Type.ANVIL);
-                if (anvil instanceof BlockStoneAnvil) {
-                    worldIn.setBlockState(pos, anvil.getDefaultState());
-                }
+                worldIn.setBlockState(pos, anvil.getDefaultState());
             }
             return true;
         }
