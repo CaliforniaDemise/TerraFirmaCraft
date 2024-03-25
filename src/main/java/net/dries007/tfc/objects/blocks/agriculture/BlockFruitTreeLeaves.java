@@ -148,9 +148,6 @@ public class BlockFruitTreeLeaves extends BlockLeaves implements IGrowingPlant {
             entityIn.fallDistance = 0;
             // Entity motion is reduced by leaves.
             entityIn.motionX *= ConfigTFC.General.MISC.leafMovementModifier;
-            if (entityIn.motionY < 0) {
-                entityIn.motionY *= ConfigTFC.General.MISC.leafMovementModifier;
-            }
             entityIn.motionZ *= ConfigTFC.General.MISC.leafMovementModifier;
         }
     }
