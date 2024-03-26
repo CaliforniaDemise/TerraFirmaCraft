@@ -3605,6 +3605,26 @@ item.tfc.wood.lumber.rosewood.name=Rosewood Lumber
 item.tfc.wood.lumber.blackwood.name=Blackwood Lumber
 item.tfc.wood.lumber.palm.name=Palm Lumber
 
+item.tfc.wood.branch.ash.name=Ash Branch
+item.tfc.wood.branch.aspen.name=Aspen Branch
+item.tfc.wood.branch.birch.name=Birch Branch
+item.tfc.wood.branch.chestnut.name=Chestnut Branch
+item.tfc.wood.branch.douglas_fir.name=Douglas Fir Branch
+item.tfc.wood.branch.hickory.name=Hickory Branch
+item.tfc.wood.branch.maple.name=Maple Branch
+item.tfc.wood.branch.oak.name=Oak Branch
+item.tfc.wood.branch.pine.name=Pine Branch
+item.tfc.wood.branch.sequoia.name=Sequoia Branch
+item.tfc.wood.branch.spruce.name=Spruce Branch
+item.tfc.wood.branch.sycamore.name=Sycamore Branch
+item.tfc.wood.branch.white_cedar.name=White Cedar Branch
+item.tfc.wood.branch.willow.name=Willow Branch
+item.tfc.wood.branch.kapok.name=Kapok Branch
+item.tfc.wood.branch.acacia.name=Acacia Branch
+item.tfc.wood.branch.rosewood.name=Rosewood Branch
+item.tfc.wood.branch.blackwood.name=Blackwood Branch
+item.tfc.wood.branch.palm.name=Palm Branch
+
 item.tfc.wood.boat.ash.name=Ash Boat
 item.tfc.wood.boat.aspen.name=Aspen Boat
 item.tfc.wood.boat.birch.name=Birch Boat

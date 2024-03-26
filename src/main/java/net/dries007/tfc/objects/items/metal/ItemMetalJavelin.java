@@ -5,15 +5,15 @@
 
 package net.dries007.tfc.objects.items.metal;
 
-import net.dries007.tfc.Constants;
 import net.dries007.tfc.api.types.Metal;
 import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.objects.entity.projectile.EntityThrownJavelin;
-import net.dries007.tfc.objects.items.ItemQuiver;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
@@ -56,28 +56,74 @@ public class ItemMetalJavelin extends ItemMetalTool {
         return 72000;
     }
 
+    protected float getVelocity(int charge) {
+        float velocity = (float) charge / 20f;
+        velocity = (velocity * velocity + velocity * 2f) / 3f;
+
+        if (velocity > 1) {
+            velocity = 1;
+        }
+
+        return velocity;
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase entityLiving, int timeLeft) {
-        if (entityLiving instanceof EntityPlayer && type == Metal.ItemType.JAVELIN) {
+    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityLivingBase entityLiving, int timeLeft) {
+        if (entityLiving instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) entityLiving;
-            int charge = this.getMaxItemUseDuration(stack) - timeLeft;
-            if (charge > 5) {
-                float f = ItemBow.getArrowVelocity(charge); //Same charge time as bow
+            int i = this.getMaxItemUseDuration(stack) - timeLeft;
 
-                if (!worldIn.isRemote) {
-                    EntityThrownJavelin javelin = new EntityThrownJavelin(worldIn, player);
-                    javelin.setDamage(2.5f * getAttackDamage());  // When thrown, it does approx 1.8x the tool material (attack damage is already 0.7x of the tool). This makes it slightly more damaging than axes but more difficult to use
-                    javelin.setWeapon(stack);
-                    javelin.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, f * 1.5F, 0.5F);
-                    worldIn.spawnEntity(javelin);
-                    worldIn.playSound(null, player.posX, player.posY, player.posZ, TFCSounds.ITEM_THROW, SoundCategory.PLAYERS, 1.0F, 1.0F / (Constants.RNG.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
-                }
-                if (!((EntityPlayer) entityLiving).isCreative())
-                    player.inventory.deleteStack(stack);
-                player.addStat(StatList.getObjectUseStats(this));
-                ItemQuiver.replenishJavelin(player.inventory); //Use a quiver if possible
+            if (i < 0) {
+                return;
             }
+
+            float velocity = getVelocity(timeLeft);
+
+            if (velocity >= 0.1) {
+
+                if (!world.isRemote) {
+
+                    stack.damageItem(1, player);
+
+                    EntityThrownJavelin javelin = new EntityThrownJavelin(world, player);
+                    javelin.setDamage(this.metal.getToolMetal().getAttackDamage());
+                    javelin.setWeapon(stack);
+
+                    javelin.shoot(player, player.rotationPitch, player.rotationYaw, 0, (float) (velocity * this.metal.getToolMetal().getEfficiency() / 4f), 0.5f);
+
+                    if (velocity == 1) {
+                        javelin.setIsCritical(true);
+                    }
+
+                    int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER, stack);
+
+                    if (j > 0) {
+                        javelin.setDamage(javelin.getDamage() + (double) j * 0.5 + 0.5);
+                    }
+
+                    int k = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH, stack);
+
+                    if (k > 0) {
+                        javelin.setKnockbackStrength(k);
+                    }
+
+                    if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAME, stack) > 0) {
+                        javelin.setFire(100);
+                    }
+
+                    if (player.capabilities.isCreativeMode) {
+                        javelin.pickupStatus = EntityArrow.PickupStatus.CREATIVE_ONLY;
+                    }
+
+                    world.spawnEntity(javelin);
+                }
+
+                world.playSound(null, player.posX, player.posY, player.posZ, TFCSounds.ITEM_THROW, SoundCategory.PLAYERS, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + velocity * 0.5F);
+                player.inventory.deleteStack(stack);
+                player.addStat(StatList.getObjectUseStats(this));
+            }
+
         }
     }
 }

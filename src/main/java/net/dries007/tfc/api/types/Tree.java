@@ -26,6 +26,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
@@ -292,5 +293,15 @@ public class Tree extends IForgeRegistryEntry.Impl<Tree> {
         public Tree build() {
             return new Tree(name, gen, minTemp, maxTemp, minRain, maxRain, minDensity, maxDensity, dominance, maxGrowthRadius, maxHeight, maxDecayDistance, isConifer, bushGenerator, canMakeTannin, minGrowthTime, burnTemp, burnTicks);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.requireNonNull(getRegistryName()).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Tree && Objects.requireNonNull(getRegistryName()) == Objects.requireNonNull(((Tree) obj).getRegistryName());
     }
 }

@@ -35,20 +35,7 @@ file "build.properties" withReader {
     ext.config = new ConfigSlurper().parse prop
 }
 
-/**
- * Version in dev is set to 'dev'
- * Any builds produced by the github actions build script will have a version matching their tag.
- * Versioning is highly based on semantic versioning: [MAJOR].[MINOR].[REVISION].[BUILD]
- *  - Major version resets on MC version changes
- *  - Minor version resets on added features or major changes
- *  - Revision resets on any bugfixes or small changes
- *  - Build increments, only resets on a new major version.
- */
-if (System.getenv('VERSION') != null) {
-    version = System.getenv('VERSION')
-} else {
-    version = 'dev'
-}
+version = config.mod.version
 
 group = "net.dries007.tfc" // According to java standards, as I have control over this domain. If you fork this and release your own version, change this.
 archivesBaseName = "TerraFirmaCraft" // Jar filename. The final result must match ^[\w-\.]+$. (Alphanumerical + `_-.`)

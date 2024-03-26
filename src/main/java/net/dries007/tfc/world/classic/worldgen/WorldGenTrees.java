@@ -9,6 +9,7 @@ import net.dries007.tfc.ConfigTFC;
 import net.dries007.tfc.api.types.Tree;
 import net.dries007.tfc.api.util.ITreeGenerator;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
+import net.dries007.tfc.objects.items.wood.ItemBranchTFC;
 import net.dries007.tfc.objects.te.TEPlacedItemFlat;
 import net.dries007.tfc.world.classic.ChunkGenTFC;
 import net.dries007.tfc.world.classic.biomes.BiomeTFC;
@@ -30,12 +31,19 @@ import net.minecraftforge.fml.common.IWorldGenerator;
 import java.util.*;
 
 public class WorldGenTrees implements IWorldGenerator {
-    public static void generateLooseSticks(Random rand, int chunkX, int chunkZ, World world, int amount) {
+    public static void generateLooseSticks(Random rand, int chunkX, int chunkZ, World world, Tree tree, BlockPos treePos, int amount) {
         if (ConfigTFC.General.WORLD.enableLooseSticks) {
             for (int i = 0; i < amount; i++) {
-                final int x = chunkX * 16 + rand.nextInt(16) + 8;
-                final int z = chunkZ * 16 + rand.nextInt(16) + 8;
+                //final int x = chunkX * 16 + rand.nextInt(16) + 8;
+                //final int z = chunkZ * 16 + rand.nextInt(16) + 8;
+                int treeChunkPosX = treePos.getX() - (chunkX * 16);
+                int treeChunkPosZ = treePos.getZ() - (chunkZ * 16);
+                final int x = treePos.getX() + rand.nextInt(24 - treeChunkPosX);
+                final int z = treePos.getZ() + rand.nextInt(24 - treeChunkPosZ);
+
                 final BlockPos pos = world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z));
+
+                final ItemStack toPlace = ItemBranchTFC.get(tree, 1);
 
                 // Use air, so it doesn't replace other replaceable world gen
                 // This matches the check in BlockPlacedItemFlat for if the block can stay
@@ -45,7 +53,7 @@ public class WorldGenTrees implements IWorldGenerator {
                     world.setBlockState(pos, BlocksTFC.PLACED_ITEM_FLAT.getDefaultState());
                     TEPlacedItemFlat tile = (TEPlacedItemFlat) world.getTileEntity(pos);
                     if (tile != null) {
-                        tile.setStack(new ItemStack(Items.STICK));
+                        tile.setStack(toPlace);
                     }
                 }
             }
@@ -71,11 +79,11 @@ public class WorldGenTrees implements IWorldGenerator {
         List<Tree> trees = chunkData.getValidTrees();
         Collections.rotate(trees, -(int) (diversity * (trees.size() - 1f)));
 
-        int stickDensity = 3 + (int) (4f * density + 1.5f * trees.size());
-        if (trees.isEmpty()) {
-            stickDensity = 1 + (int) (1.5f * density);
-        }
-        generateLooseSticks(random, chunkX, chunkZ, world, (int) (Math.ceil(stickDensity * ConfigTFC.General.WORLD.sticksDensityModifier)));
+        //int stickDensity = 3 + (int) (4f * density + 1.5f * trees.size());
+        //if (trees.isEmpty()) {
+        int stickDensity = 1 + (int) (1.5f * density);
+        //}
+        //generateLooseSticks(random, chunkX, chunkZ, world, (int) (Math.ceil(stickDensity * ConfigTFC.General.WORLD.sticksDensityModifier)));
 
         // This is to avoid giant regions of no trees whatsoever.
         // It will create sparse trees ( < 1 per chunk) by averaging the climate data to make it more temperate
@@ -89,6 +97,7 @@ public class WorldGenTrees implements IWorldGenerator {
                 final int x = chunkX * 16 + random.nextInt(16) + 8;
                 final int z = chunkZ * 16 + random.nextInt(16) + 8;
                 final BlockPos pos = world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z));
+                generateLooseSticks(random, chunkX, chunkZ, world, extra, pos, stickDensity);
                 extra.makeTree(manager, world, pos, random, true);
             }
             return;
@@ -106,6 +115,7 @@ public class WorldGenTrees implements IWorldGenerator {
                 final BlockPos pos = world.getTopSolidOrLiquidBlock(column);
                 final Tree tree = getTree(trees, density, random);
 
+                generateLooseSticks(random, chunkX, chunkZ, world, tree, pos, stickDensity);
                 checkedPositions.add(column);
                 if (tree.makeTree(manager, world, pos, random, true)) {
                     treesPlaced++;

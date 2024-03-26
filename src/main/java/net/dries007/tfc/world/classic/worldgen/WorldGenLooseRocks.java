@@ -86,12 +86,9 @@ public class WorldGenLooseRocks implements IWorldGenerator {
                 }
             }
 
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (int i = 0; i < ConfigTFC.General.WORLD.looseRocksFrequency * factor; i++) {
-                BlockPos pos = new BlockPos(
-                    xoff + random.nextInt(16),
-                    0,
-                    zoff + random.nextInt(16)
-                );
+                pos.setPos(xoff + random.nextInt(16), 0, zoff + random.nextInt(16));
                 Rock rock = baseChunkData.getRock1(pos);
                 generateRock(world, pos.up(world.getTopSolidOrLiquidBlock(pos).getY()), getRandomVein(veins, pos, random), rock);
             }

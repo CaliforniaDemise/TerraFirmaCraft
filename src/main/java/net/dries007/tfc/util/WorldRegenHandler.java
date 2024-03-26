@@ -79,6 +79,7 @@ public class WorldRegenHandler {
         }
     }
 
+    // TODO Regen is broken. It's impossible to get proper tree. Maybe save generated trees to somewhere to fix it.
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         if (!event.world.isRemote && event.phase == TickEvent.Phase.END) {
@@ -99,13 +100,12 @@ public class WorldRegenHandler {
                             double rockModifier = ConfigTFC.General.WORLD_REGEN.sticksRocksModifier;
                             ROCKS_GEN.generate(RANDOM, pos.x, pos.z, event.world, chunkGenerator, chunkProvider);
 
-                            final float density = chunkDataTFC.getFloraDensity();
+                            /*final float density = chunkDataTFC.getFloraDensity();
                             List<Tree> trees = chunkDataTFC.getValidTrees();
-                            int stickDensity = 3 + (int) (4f * density + 1.5f * trees.size() * rockModifier);
-                            if (trees.isEmpty()) {
-                                stickDensity = 1 + (int) (1.5f * density * rockModifier);
-                            }
-                            WorldGenTrees.generateLooseSticks(RANDOM, pos.x, pos.z, event.world, stickDensity);
+
+                            int stickDensity = 1 + (int) (1.5f * density);
+
+                            WorldGenTrees.generateLooseSticks(RANDOM, pos.x, pos.z, event.world, stickDensity);*/
                         }
 
                         //Nuke crops/mushrooms/dead crops (not sure the latter is working.
