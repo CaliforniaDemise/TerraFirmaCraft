@@ -40,6 +40,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
 import static net.dries007.tfc.objects.te.TEQuern.SLOT_HANDSTONE;
+import static net.dries007.tfc.objects.te.TEQuern.SLOT_INPUT;
 
 @ParametersAreNonnullByDefault
 public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
@@ -190,10 +191,21 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                         playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(TEQuern.SLOT_INPUT, heldStack));
                         teQuern.setAndUpdateSlots(TEQuern.SLOT_INPUT);
                         return true;
-                    } else if (selection == SelectionPlace.HANDSTONE && inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && inventory.isItemValid(SLOT_HANDSTONE, heldStack)) {
-                        playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(SLOT_HANDSTONE, heldStack));
-                        teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
-                        return true;
+                    } else if (selection == SelectionPlace.HANDSTONE) {
+                        if (inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && inventory.isItemValid(SLOT_HANDSTONE, heldStack)) {
+                            playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(SLOT_HANDSTONE, heldStack));
+                            teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
+                            return true;
+                        }
+                        else if (!inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && heldStack.isEmpty() && playerIn.isSneaking()) {
+                            playerIn.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(SLOT_HANDSTONE));
+                            ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
+                            teQuern.insertOrSwapItem(SLOT_HANDSTONE, ItemStack.EMPTY);
+                            teQuern.insertOrSwapItem(SLOT_INPUT, ItemStack.EMPTY);
+                            spawnAsEntity(world, pos, input);
+                            teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
+                            teQuern.setAndUpdateSlots(SLOT_INPUT);
+                        }
                     } else if (selection == SelectionPlace.BASE && !inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).isEmpty()) {
                         ItemHandlerHelper.giveItemToPlayer(playerIn, inventory.extractItem(TEQuern.SLOT_OUTPUT, inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).getCount(), false));
                         teQuern.setAndUpdateSlots(TEQuern.SLOT_OUTPUT);

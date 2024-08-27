@@ -70,7 +70,7 @@ public class TEQuern extends TEInventory implements ITickable {
     public void setAndUpdateSlots(int slot) {
         markForBlockUpdate();
         if (slot == SLOT_HANDSTONE) {
-            hasHandstone = OreDictionaryHelper.doesStackMatchOre(inventory.getStackInSlot(SLOT_HANDSTONE), "handstone");
+            hasHandstone = !inventory.getStackInSlot(slot).isEmpty();
         }
         super.setAndUpdateSlots(slot);
     }
@@ -79,7 +79,7 @@ public class TEQuern extends TEInventory implements ITickable {
     public void readFromNBT(NBTTagCompound nbt) {
         rotationTimer = nbt.getInteger("rotationTimer");
         super.readFromNBT(nbt);
-        hasHandstone = OreDictionaryHelper.doesStackMatchOre(inventory.getStackInSlot(SLOT_HANDSTONE), "handstone");
+        hasHandstone = !inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty();
     }
 
     @Override

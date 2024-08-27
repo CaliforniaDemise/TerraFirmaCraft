@@ -65,6 +65,7 @@ minecraft { // Only change any of this with prior approval from the dev team!
     mcVersion = config.minecraft.version
     username = 'Developer'
     useDependencyAccessTransformers = true
+    extraRunJvmArguments.addAll("-Xms1024m", "-Xmx3072m")
 }
 
 repositories {
