@@ -7,6 +7,7 @@ package net.dries007.tfc.objects.te;
 
 import net.dries007.tfc.api.capability.food.CapabilityFood;
 import net.dries007.tfc.api.recipes.quern.QuernRecipe;
+import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.objects.items.ItemsTFC;
 import net.dries007.tfc.util.OreDictionaryHelper;
 import net.minecraft.entity.passive.EntityCow;
@@ -41,7 +42,6 @@ public class TEQuern extends TEInventory implements ITickable {
 
     public ItemStack insertOrSwapItem(int slot, ItemStack playerStack) {
         ItemStack quernStack = inventory.getStackInSlot(slot);
-
         if (quernStack.isEmpty() || (playerStack.isStackable() && quernStack.isStackable() && quernStack.getItem() == playerStack.getItem() && (!playerStack.getHasSubtypes() || playerStack.getMetadata() == quernStack.getMetadata()) && ItemStack.areItemStackTagsEqual(playerStack, quernStack))) {
             return inventory.insertItem(slot, playerStack, false);
         }
@@ -58,7 +58,7 @@ public class TEQuern extends TEInventory implements ITickable {
     public boolean isItemValid(int slot, ItemStack stack) {
         switch (slot) {
             case SLOT_HANDSTONE:
-                return OreDictionaryHelper.doesStackMatchOre(stack, "handstone");
+                return stack.getItem() instanceof IHandstone;
             case SLOT_INPUT:
                 return QuernRecipe.get(stack) != null;
             default:
@@ -106,9 +106,14 @@ public class TEQuern extends TEInventory implements ITickable {
         return hasHandstone;
     }
 
-    public void grind() {
-        this.rotationTimer = 90;
-        markForBlockUpdate();
+    public void grind(EntityPlayer player) {
+        ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+        IHandstone handstone = (IHandstone) handstoneStack.getItem();
+        if (handstone.canUse(this.world, this.pos, this, player, handstoneStack)) {
+            this.rotationTimer = 90;
+            handstone.use(this.world, this.pos, this, player, handstoneStack);
+            markForBlockUpdate();
+        }
     }
 
     @Override

@@ -184,7 +184,7 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                 IItemHandler inventory = teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
                 if (inventory != null) {
                     if (selection == SelectionPlace.HANDLE) {
-                        teQuern.grind();
+                        teQuern.grind(playerIn);
                         world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
                         return true;
                     } else if (selection == SelectionPlace.INPUT_SLOT) {
