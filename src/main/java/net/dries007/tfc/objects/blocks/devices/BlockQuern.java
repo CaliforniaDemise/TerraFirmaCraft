@@ -205,6 +205,7 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                             spawnAsEntity(world, pos, input);
                             teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
                             teQuern.setAndUpdateSlots(SLOT_INPUT);
+                            return true;
                         }
                     } else if (selection == SelectionPlace.BASE && !inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).isEmpty()) {
                         ItemHandlerHelper.giveItemToPlayer(playerIn, inventory.extractItem(TEQuern.SLOT_OUTPUT, inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).getCount(), false));
