@@ -8,6 +8,7 @@ package net.dries007.tfc.objects.blocks.devices;
 import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
+import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.client.gui.overlay.IHighlightHandler;
 import net.dries007.tfc.objects.te.TEQuern;
@@ -33,11 +34,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Objects;
 
 import static net.dries007.tfc.objects.te.TEQuern.SLOT_HANDSTONE;
 import static net.dries007.tfc.objects.te.TEQuern.SLOT_INPUT;
@@ -47,15 +51,13 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
     private static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(0D, 0D, 0D, 1D, 0.625D, 1D);
     private static final AxisAlignedBB QUERN_AABB = new AxisAlignedBB(0D, 0D, 0D, 1D, 0.875D, 1D);
 
-    private static final AxisAlignedBB HANDSTONE_AABB = new AxisAlignedBB(0.1875D, 0.625D, 0.1875D, 0.8125D, 0.86D, 0.8125D);
-    private static final AxisAlignedBB HANDLE_AABB = new AxisAlignedBB(0.27125D, 0.86D, 0.27125D, 0.335D, 1.015D, 0.335D);
-
     private static final AxisAlignedBB INPUT_SLOT_AABB = new AxisAlignedBB(0.375D, 0.86D, 0.375D, 0.625D, 1.015D, 0.625D);
 
     /**
      * Gets the selection place player is looking at
      * Used for interaction / selection box drawing
      */
+    private static Logger logger = LogManager.getLogger("test");
     private static SelectionPlace getPlayerSelection(World world, BlockPos pos, EntityPlayer player) {
         // This will compute a line from the camera center (crosshair) starting at the player eye pos and a little after this block
         // so we can grab the exact point regardless from which face player is looking from
@@ -66,14 +68,27 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
         TEQuern teQuern = Helpers.getTE(world, pos, TEQuern.class);
 
         if (teQuern != null) {
-            IItemHandler inventory = teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+            IItemHandler inventory = Objects.requireNonNull(teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
             // Draws the correct selection box depending on where the player is looking at
-            if (!teQuern.isGrinding() && teQuern.hasHandstone() && HANDLE_AABB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
-                return SelectionPlace.HANDLE;
-            } else if (!teQuern.isGrinding() && teQuern.hasHandstone() && (!player.getHeldItem(EnumHand.MAIN_HAND).isEmpty() || (inventory != null && !inventory.getStackInSlot(TEQuern.SLOT_INPUT).isEmpty())) && INPUT_SLOT_AABB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
-                return SelectionPlace.INPUT_SLOT;
-            } else if ((teQuern.hasHandstone() || teQuern.isItemValid(TEQuern.SLOT_HANDSTONE, player.getHeldItem(EnumHand.MAIN_HAND))) && HANDSTONE_AABB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
-                return SelectionPlace.HANDSTONE;
+            if (!teQuern.isGrinding() && teQuern.hasHandstone()) {
+                ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+                IHandstone handstone = (IHandstone) handstoneStack.getItem();
+                AxisAlignedBB HANDLE_BB = handstone.getHandleBoundingBox(world, pos, teQuern, player, handstoneStack);
+                if (HANDLE_BB != null && HANDLE_BB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
+                    return SelectionPlace.HANDLE;
+                }
+                else if ((!player.getHeldItem(EnumHand.MAIN_HAND).isEmpty() || !inventory.getStackInSlot(TEQuern.SLOT_INPUT).isEmpty()) && INPUT_SLOT_AABB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
+                    return SelectionPlace.INPUT_SLOT;
+                }
+            }
+
+            ItemStack handstoneStack = getHandstone(teQuern, inventory, player);
+            if (!handstoneStack.isEmpty()) {
+                IHandstone handstone = (IHandstone) handstoneStack.getItem();
+                AxisAlignedBB HANDSTONE_BB = handstone.getBoundingBox(world, pos, teQuern, player, handstoneStack);
+                if (HANDSTONE_BB != null && HANDSTONE_BB.offset(pos).calculateIntercept(eyePos, lookingPos) != null) {
+                    return SelectionPlace.HANDSTONE;
+                }
             }
         }
         return SelectionPlace.BASE;
@@ -155,7 +170,13 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
         addCollisionBoxToList(pos, entityBox, collidingBoxes, BASE_AABB);
         TEQuern teQuern = Helpers.getTE(world, pos, TEQuern.class);
         if (teQuern != null && teQuern.hasHandstone()) {
-            addCollisionBoxToList(pos, entityBox, collidingBoxes, HANDSTONE_AABB);
+            IItemHandler inventory = Objects.requireNonNull(teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
+            ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+            IHandstone handstone = (IHandstone) handstoneStack.getItem();
+            AxisAlignedBB HANDSTONE_BB = handstone.getBoundingBox(world, pos, teQuern, entityIn, handstoneStack);
+            if (HANDSTONE_BB != null) {
+                addCollisionBoxToList(pos, entityBox, collidingBoxes, HANDSTONE_BB);
+            }
         }
     }
 
@@ -202,7 +223,7 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                             ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
                             teQuern.insertOrSwapItem(SLOT_HANDSTONE, ItemStack.EMPTY);
                             teQuern.insertOrSwapItem(SLOT_INPUT, ItemStack.EMPTY);
-                            spawnAsEntity(world, pos, input);
+                            if (!input.isEmpty()) spawnAsEntity(world, pos, input);
                             teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
                             teQuern.setAndUpdateSlots(SLOT_INPUT);
                             return true;
@@ -248,21 +269,48 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
 
         SelectionPlace selection = getPlayerSelection(world, pos, player);
 
+        TEQuern quern = (TEQuern) world.getTileEntity(pos);
+        if (quern == null) {
+            IHighlightHandler.drawBox(BASE_AABB.offset(pos).offset(-dx, -dy, -dz).grow(0.002D), 1f, 0, 0, 0, 0.4f);
+            return true;
+        }
+
+        IItemHandler handler = Objects.requireNonNull(quern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
+        ItemStack handstoneStack = getHandstone(quern, handler, player);
+        if (handstoneStack.isEmpty()) {
+            IHighlightHandler.drawBox(BASE_AABB.offset(pos).offset(-dx, -dy, -dz).grow(0.002D), 1f, 0, 0, 0, 0.4f);
+            return true;
+        }
+
+        IHandstone handstone = (IHandstone) handstoneStack.getItem();
+
         // Draws the correct selection box depending on where the player is looking at
         if (selection == SelectionPlace.HANDLE) {
             // Draws handle AABB if player is looking at it
-            IHighlightHandler.drawBox(HANDLE_AABB.offset(pos).offset(-dx, -dy, -dz), 1f, 0, 0, 0, 0.4f);
+            AxisAlignedBB HANDLE_BB = handstone.getHandleBoundingBox(world, pos, quern, player, handstoneStack);
+            if (HANDLE_BB != null) IHighlightHandler.drawBox(HANDLE_BB.offset(pos).offset(-dx, -dy, -dz), 1f, 0, 0, 0, 0.4f);
         } else if (selection == SelectionPlace.INPUT_SLOT) {
             // Draws item input AABB if user has item in main hand or there is an item in slot
             IHighlightHandler.drawBox(INPUT_SLOT_AABB.offset(pos).offset(-dx, -dy, -dz), 1f, 0, 0, 0, 0.4f);
         } else if (selection == SelectionPlace.HANDSTONE) {
             // Draws handstone AABB if player is looking at it
-            IHighlightHandler.drawBox(HANDSTONE_AABB.offset(pos).offset(-dx, -dy, -dz).grow(0.002D), 1f, 0, 0, 0, 0.4f);
+            AxisAlignedBB HANDSTONE_BB = handstone.getBoundingBox(world, pos, quern, player, handstoneStack);
+            if (HANDSTONE_BB != null) IHighlightHandler.drawBox(HANDSTONE_BB.offset(pos).offset(-dx, -dy, -dz).grow(0.002D), 1f, 0, 0, 0, 0.4f);
         } else {
             // Just draw the base outline (last grow is just what MC does to actually make the outline visible
             IHighlightHandler.drawBox(BASE_AABB.offset(pos).offset(-dx, -dy, -dz).grow(0.002D), 1f, 0, 0, 0, 0.4f);
         }
         return true;
+    }
+
+    private static ItemStack getHandstone(TEQuern quern, IItemHandler handler, EntityPlayer player) {
+        boolean flag = quern.hasHandstone();
+        ItemStack stack = flag ? handler.getStackInSlot(SLOT_HANDSTONE) : player.getHeldItem(EnumHand.MAIN_HAND);
+        if (!flag && !quern.isItemValid(SLOT_HANDSTONE, stack)) player.getHeldItem(EnumHand.OFF_HAND);
+        if (flag || quern.isItemValid(SLOT_HANDSTONE, stack)) {
+            return stack;
+        }
+        return ItemStack.EMPTY;
     }
 
     /**
