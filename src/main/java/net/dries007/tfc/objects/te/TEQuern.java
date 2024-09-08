@@ -24,7 +24,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static net.minecraft.init.SoundEvents.*;
@@ -39,8 +38,6 @@ public class TEQuern extends TEInventory implements ITickable {
     private boolean hasHandstone;
 
     private INBTSerializable<NBTTagCompound> handstoneNBT = null;
-
-    private QuernRecipe recipe = null;
 
     public TEQuern() {
         super(3);
@@ -82,10 +79,13 @@ public class TEQuern extends TEInventory implements ITickable {
         markForBlockUpdate();
         if (slot == SLOT_HANDSTONE) {
             ItemStack handstoneStack = inventory.getStackInSlot(slot);
-            ItemHandstone<?> handstone = (ItemHandstone<?>) handstoneStack.getItem();
             hasHandstone = !handstoneStack.isEmpty();
-            if (hasHandstone && handstone.hasData(handstoneStack)) {
-                if (handstoneNBT == null) handstoneNBT = handstone.createNBT(this.world, this.pos, this);
+            if (hasHandstone) {
+                ItemHandstone<?> handstone = (ItemHandstone<?>) handstoneStack.getItem();
+                if (handstone.hasData(handstoneStack)) {
+                    if (handstoneNBT == null) handstoneNBT = handstone.createNBT(this.world, this.pos, this);
+                }
+                else handstoneNBT = null;
             }
             else this.handstoneNBT = null;
         }
@@ -104,10 +104,6 @@ public class TEQuern extends TEInventory implements ITickable {
                 this.handstoneNBT = handstoneItem.createNBT(this.world, this.pos, this);
             }
             if (handstoneNBT != null) handstoneNBT.deserializeNBT(nbt.getCompoundTag("handstoneNBT"));
-        }
-        ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
-        if (!input.isEmpty()) {
-            this.recipe = QuernRecipe.get(input);
         }
     }
 
@@ -174,6 +170,7 @@ public class TEQuern extends TEInventory implements ITickable {
 
         if (handstoneNBT != null) {
             ItemStack stack = inventory.getStackInSlot(SLOT_HANDSTONE);
+            if (stack.isEmpty()) return;
             IHandstone handstone = (IHandstone) stack.getItem();
             handstone.update(this.world, this.pos, this, stack, handstoneNBT);
         }
@@ -192,25 +189,15 @@ public class TEQuern extends TEInventory implements ITickable {
         return stackSize == stack.getMaxStackSize() || stackSize == this.inventory.getSlotLimit(slot);
     }
 
-    public boolean hasRecipe() {
-        return this.recipe != null;
-    }
-
-    @Nullable
-    public QuernRecipe getRecipe() {
-        return this.recipe;
-    }
-
-    public void updateRecipe() {
-        if (this.recipe == null) {
-            ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
-            if (!inputStack.isEmpty()) this.recipe = QuernRecipe.get(inputStack);
-        }
+    public ItemStack getStackInSlot(int slot) {
+        return inventory.getStackInSlot(slot);
     }
 
     private void grindItem() {
+        ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
+        if (inputStack.isEmpty()) return;
+        QuernRecipe recipe = QuernRecipe.get(inputStack);
         if (recipe != null && !world.isRemote) {
-            ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
             inputStack.shrink(recipe.getIngredients().get(0).getAmount());
             ItemStack outputStack = recipe.getOutputItem(inputStack);
             outputStack = inventory.insertItem(SLOT_OUTPUT, outputStack, false);
@@ -219,7 +206,11 @@ public class TEQuern extends TEInventory implements ITickable {
                 // Still having leftover items, dumping in world
                 InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY() + 1, pos.getZ(), outputStack);
             }
-            if (inputStack.isEmpty()) this.recipe = null;
+        }
+        ItemStack handstoneStack = this.inventory.getStackInSlot(SLOT_HANDSTONE);
+        if (!handstoneStack.isEmpty()) {
+            ItemHandstone<INBTSerializable<NBTTagCompound>> handstone = (ItemHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
+            handstone.afterGrind(this.world, this.pos, this, this.handstoneNBT);
         }
     }
 }

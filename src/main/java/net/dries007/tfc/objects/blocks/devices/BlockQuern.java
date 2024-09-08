@@ -210,7 +210,6 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                         } else if (selection == SelectionPlace.INPUT_SLOT) {
                             playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(TEQuern.SLOT_INPUT, heldStack));
                             teQuern.setAndUpdateSlots(TEQuern.SLOT_INPUT);
-                            teQuern.updateRecipe();
                             return true;
                         } else if (selection == SelectionPlace.HANDSTONE) {
                             if (inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && inventory.isItemValid(SLOT_HANDSTONE, heldStack)) {

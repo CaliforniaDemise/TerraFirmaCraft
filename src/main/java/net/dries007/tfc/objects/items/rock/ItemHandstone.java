@@ -46,6 +46,8 @@ public class ItemHandstone<T extends INBTSerializable<NBTTagCompound>> extends I
         world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
     }
 
+    public void afterGrind(World world, BlockPos pos, TEQuern quern, T handstoneNBT) {}
+
     public boolean hasData(ItemStack stack) {
         return false;
     }

@@ -4,6 +4,7 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -15,6 +16,7 @@ public class HandstoneHorseData implements INBTSerializable<NBTTagCompound> {
     private UUID workerUUID = null;
 
     private EntityCreature worker = null;
+    private Vec3d[] locations = null;
 
     public HandstoneHorseData(BlockPos pos) {
         this.pos = pos;
@@ -22,6 +24,18 @@ public class HandstoneHorseData implements INBTSerializable<NBTTagCompound> {
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public Vec3d[] getLocations(BlockPos quernPos) {
+        if (this.locations != null) return this.locations;
+        this.locations = new Vec3d[4];
+        double minX = quernPos.getX() - 3.0D, maxX = quernPos.getX() + 3.0D;
+        double minZ = quernPos.getZ() - 3.0D, maxZ = quernPos.getZ() + 3.0D;
+        this.locations[0] = new Vec3d(minX, quernPos.getY(), maxZ);
+        this.locations[1] = new Vec3d(minX, quernPos.getY(), minZ);
+        this.locations[2] = new Vec3d(maxX, quernPos.getY(), minZ);
+        this.locations[3] = new Vec3d(maxX, quernPos.getY(), maxZ);
+        return this.locations;
     }
 
     public boolean hasWorker() {

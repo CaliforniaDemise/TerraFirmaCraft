@@ -8,13 +8,16 @@ import net.dries007.tfc.objects.te.TEQuern;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -58,12 +61,65 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
         EntityCreature creature = handstoneNBT.getWorker(world);
         if (creature != null) {
             creature.setHomePosAndDistance(pos, 3);
-            if (!quern.isSlotFull(TEQuern.SLOT_OUTPUT) && quern.hasRecipe() && quern.getRotationTimer() == 0) {
+            ItemStack input = quern.getStackInSlot(TEQuern.SLOT_INPUT);
+            if (!input.isEmpty() && !quern.isSlotFull(TEQuern.SLOT_OUTPUT) && quern.getRotationTimer() == 0) {
                 quern.setRotationTimer(90);
                 quern.markForBlockUpdate();
                 world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
             }
+            if (quern.isGrinding()) {
+                if (creature instanceof AbstractHorse && ((AbstractHorse) creature).isEatingHaystack()) {
+                    ((AbstractHorse) creature).setEatingHaystack(false);
+                }
+                PathNavigate navigator = creature.getNavigator();
+                if (navigator.noPath()) {
+                    this.tryToMove(navigator, creature, pos, handstoneNBT);
+                }
+            }
         }
+    }
+
+    @Override
+    public void afterGrind(World world, BlockPos pos, TEQuern quern, HandstoneHorseData handstoneNBT) {
+        EntityCreature creature = handstoneNBT.getWorker(world);
+        ItemStack input = quern.getStackInSlot(TEQuern.SLOT_INPUT);
+        if (creature != null && input.isEmpty()) {
+            creature.getNavigator().clearPath();
+        }
+    }
+
+    private void tryToMove(PathNavigate navigator, EntityCreature creature, BlockPos quernPos, HandstoneHorseData data) {
+        if (navigator.noPath()) {
+            Vec3d[] locations = data.getLocations(quernPos);
+            Vec3d nextLoc = null;
+            for (int i = 0; i < locations.length; i++) {
+                Vec3d v = locations[i];
+                if (this.intersects(creature, v)) {
+                    int next = i + 1;
+                    if (next == locations.length) next = 0;
+                    nextLoc = locations[next];
+                    break;
+                }
+            }
+
+            if (nextLoc == null) {
+                double xDiff = creature.posX - quernPos.getX(), zDiff = creature.posZ - quernPos.getZ();
+                int loc = 0;
+                if (xDiff >= 0) loc += 2;
+                if (zDiff <= 0) loc += 1;
+                nextLoc = locations[loc];
+            }
+
+            if (nextLoc != null) {
+                navigator.tryMoveToXYZ(nextLoc.x, nextLoc.y, nextLoc.z, 2.0D);
+            }
+        }
+    }
+
+    private boolean intersects(Entity entity, Vec3d position) {
+        double minX = position.x, maxX = position.x + 1.0D;
+        double minZ = position.z, maxZ = position.z + 1.0D;
+        return entity.posX > minX && entity.posX < maxX && entity.posZ > minZ && entity.posZ < maxZ;
     }
 
     @Override
