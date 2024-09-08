@@ -95,6 +95,10 @@ public final class ConfigTFC {
             @Config.LangKey("config." + MOD_ID + ".general.debug.debugWorldGenSafe")
             @Config.RequiresWorldRestart
             public boolean debugWorldGenSafe = false;
+
+            @Config.Comment("Debug calendar. This will output when calendar needs to sync and catchup. This is safe to use.")
+            @Config.RequiresWorldRestart
+            public boolean debugCalendar = false;
         }
 
         public static final class OverridesCFG {

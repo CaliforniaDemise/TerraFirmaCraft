@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO Fix calendar. It's in a really shitty position. It might actually be worth it to redo it with the help of coremodding.
 public final class CalendarTFC implements INBTSerializable<NBTTagCompound> {
     public static final CalendarTFC INSTANCE = new CalendarTFC();
 
@@ -232,29 +233,36 @@ public final class CalendarTFC implements INBTSerializable<NBTTagCompound> {
      * Called on each overworld tick, increments and syncs calendar time
      */
     public void onOverworldTick(World world) {
+        boolean debugCalendar = ConfigTFC.General.DEBUG.debugCalendar;
+
         if (doDaylightCycle && arePlayersLoggedOn) {
             calendarTime++;
         }
         long deltaWorldTime = (world.getWorldTime() % ICalendar.TICKS_IN_DAY) - CALENDAR_TIME.getWorldTime();
         if (deltaWorldTime > 1 || deltaWorldTime < -1) {
-            TerraFirmaCraft.getLog().info("World time and Calendar Time are out of sync! Trying to fix...");
-            TerraFirmaCraft.getLog().info("Calendar Time = {} ({}), Player Time = {}, World Time = {}, doDaylightCycle = {}, ArePlayersLoggedOn = {}", calendarTime, CALENDAR_TIME.getWorldTime(), playerTime, world.getWorldTime() % ICalendar.TICKS_IN_DAY, doDaylightCycle, arePlayersLoggedOn);
+            if (debugCalendar) {
+                TerraFirmaCraft.getLog().info("World time and Calendar Time are out of sync! Trying to fix...");
+                TerraFirmaCraft.getLog().info("Calendar Time = {} ({}), Player Time = {}, World Time = {}, doDaylightCycle = {}, ArePlayersLoggedOn = {}", calendarTime, CALENDAR_TIME.getWorldTime(), playerTime, world.getWorldTime() % ICalendar.TICKS_IN_DAY, doDaylightCycle, arePlayersLoggedOn);
+            }
 
             // Check if tracking values are wrong
             boolean checkArePlayersLoggedOn = server.getPlayerList().getPlayers().size() > 0;
             if (arePlayersLoggedOn != checkArePlayersLoggedOn) {
                 // Whoops, somehow we missed this.
-                TerraFirmaCraft.getLog().info("Setting ArePlayersLoggedOn = {}", checkArePlayersLoggedOn);
                 setPlayersLoggedOn(checkArePlayersLoggedOn);
             }
             if (deltaWorldTime < 0) {
                 // Calendar is ahead, so jump world time
-                world.setWorldTime(world.getWorldTime() - deltaWorldTime);
-                TerraFirmaCraft.getLog().info("Calendar is ahead by {} ticks, jumping world time to catch up", -deltaWorldTime);
+                if (debugCalendar) {
+                    world.setWorldTime(world.getWorldTime() - deltaWorldTime);
+                    TerraFirmaCraft.getLog().info("Calendar is ahead by {} ticks, jumping world time to catch up", -deltaWorldTime);
+                }
             } else {
                 // World time is ahead, so jump calendar
                 calendarTime += deltaWorldTime;
-                TerraFirmaCraft.getLog().info("Calendar is behind by {} ticks, jumping calendar time to catch up", deltaWorldTime);
+                if (debugCalendar) {
+                    TerraFirmaCraft.getLog().info("Calendar is behind by {} ticks, jumping calendar time to catch up", deltaWorldTime);
+                }
             }
             TerraFirmaCraft.getNetwork().sendToAll(new PacketCalendarUpdate(this));
         }
