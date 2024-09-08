@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
 
-    private static final AxisAlignedBB HANDLE_AABB = new AxisAlignedBB(0.4225D, 0.785D, 0.4225D, 0.582D, 1.095D, 0.582D);
+    private static final AxisAlignedBB HANDLE_AABB = new AxisAlignedBB(0.462375D, 1.0D, 0.462375D, 0.54D, 1.175D, 0.54D);
 
     public ItemHandstoneHorse(int durability, Size size, Weight weight, Object... oreNameParts) {
         super(durability, size, weight, oreNameParts);
