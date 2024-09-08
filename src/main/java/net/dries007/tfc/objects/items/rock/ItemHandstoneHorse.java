@@ -111,14 +111,14 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
             }
 
             if (nextLoc != null) {
-                navigator.tryMoveToXYZ(nextLoc.x, nextLoc.y, nextLoc.z, 2.0D);
+                navigator.tryMoveToXYZ(nextLoc.x, nextLoc.y, nextLoc.z, 1.5D);
             }
         }
     }
 
     private boolean intersects(Entity entity, Vec3d position) {
-        double minX = position.x, maxX = position.x + 1.0D;
-        double minZ = position.z, maxZ = position.z + 1.0D;
+        double minX = position.x - 2.0D, maxX = position.x + 2.0D;
+        double minZ = position.z - 2.0D, maxZ = position.z + 2.0D;
         return entity.posX > minX && entity.posX < maxX && entity.posZ > minZ && entity.posZ < maxZ;
     }
 
