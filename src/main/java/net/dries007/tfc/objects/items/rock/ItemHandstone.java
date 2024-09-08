@@ -3,6 +3,7 @@ package net.dries007.tfc.objects.items.rock;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
 import net.dries007.tfc.api.util.IHandstone;
+import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.objects.items.ItemCraftingTool;
 import net.dries007.tfc.objects.te.TEQuern;
 import net.minecraft.entity.Entity;
@@ -10,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -41,5 +43,10 @@ public class ItemHandstone<T extends INBTSerializable<NBTTagCompound>> extends I
     public void use(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable INBTSerializable<NBTTagCompound> handstoneNBT) {
         quern.setRotationTimer(90);
         quern.markForBlockUpdate();
+        world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
+    }
+
+    public boolean hasData(ItemStack stack) {
+        return false;
     }
 }

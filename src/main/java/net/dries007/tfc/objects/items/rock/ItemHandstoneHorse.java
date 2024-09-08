@@ -3,15 +3,16 @@ package net.dries007.tfc.objects.items.rock;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
 import net.dries007.tfc.api.nbt.HandstoneHorseData;
+import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.objects.te.TEQuern;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLeashKnot;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,29 +31,39 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
 
     @Override
     public boolean canUse(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, INBTSerializable<NBTTagCompound> handstoneNBT) {
-        EntityLiving entityLiving = Helpers.getLeashedEntity(world, player, player.getPosition());
-        return entityLiving != null;
+        EntityCreature creature = Helpers.getLeashedEntity(world, player, player.getPosition());
+        return creature != null;
     }
 
     @Override
     public void use(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, INBTSerializable<NBTTagCompound> handstoneNBT) {
-        if (world.isRemote) return;
-        EntityLiving entityLiving = Helpers.getLeashedEntity(world, player, pos);
-        if (entityLiving != null) {
-            entityLiving.clearLeashed(true, false);
-            HandstoneHorseData data = (HandstoneHorseData) handstoneNBT;
-            data.setWorkerUUID(entityLiving.getUniqueID());
+        HandstoneHorseData data = (HandstoneHorseData) handstoneNBT;
+        if (data.hasWorker()) {
+            EntityCreature creature = data.getWorker(world);
+            creature.setLeashHolder(player, true);
+            creature.setHomePosAndDistance(BlockPos.ORIGIN, -1);
+        }
+        else {
+            EntityCreature creature = Helpers.getLeashedEntity(world, player, pos);
+            if (creature != null) {
+                creature.clearLeashed(true, false);
+                creature.setHomePosAndDistance(pos, 3);
+                data.setWorkerUUID(creature.getUniqueID());
+            }
         }
     }
 
     @Override
     public void update(World world, BlockPos pos, TEQuern quern, ItemStack stack, HandstoneHorseData handstoneNBT) {
-        if (world.isRemote) return;
-//        if (quern.getRotationTimer() != 0) {
-//            EntityLiving entityLiving = handstoneNBT.getWorker(world);
-//            if (entityLiving != null) {
-//            }
-//        }
+        EntityCreature creature = handstoneNBT.getWorker(world);
+        if (creature != null) {
+            creature.setHomePosAndDistance(pos, 3);
+            if (!quern.isSlotFull(TEQuern.SLOT_OUTPUT) && quern.hasRecipe() && quern.getRotationTimer() == 0) {
+                quern.setRotationTimer(90);
+                quern.markForBlockUpdate();
+                world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
+            }
+        }
     }
 
     @Override
@@ -70,5 +81,10 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
     @Override
     public AxisAlignedBB getHandleBoundingBox(World world, BlockPos pos, TEQuern quern, Entity entity, ItemStack stack) {
         return HANDLE_AABB;
+    }
+
+    @Override
+    public boolean hasData(ItemStack stack) {
+       return true;
     }
 }

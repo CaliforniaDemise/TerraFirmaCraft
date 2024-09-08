@@ -199,37 +199,39 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (hand.equals(EnumHand.MAIN_HAND)) {
             TEQuern teQuern = Helpers.getTE(world, pos, TEQuern.class);
-            if (teQuern != null && !teQuern.isGrinding()) {
+            if (teQuern != null) {
                 ItemStack heldStack = playerIn.getHeldItem(hand);
                 SelectionPlace selection = getPlayerSelection(world, pos, playerIn);
                 IItemHandler inventory = teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
                 if (inventory != null) {
-                    if (selection == SelectionPlace.HANDLE) {
-                        if (teQuern.grind(playerIn, hand)) {
-                            world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
+                    if (!teQuern.isGrinding()) {
+                        if (selection == SelectionPlace.HANDLE) {
+                            return teQuern.grind(playerIn, hand);
+                        } else if (selection == SelectionPlace.INPUT_SLOT) {
+                            playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(TEQuern.SLOT_INPUT, heldStack));
+                            teQuern.setAndUpdateSlots(TEQuern.SLOT_INPUT);
+                            teQuern.updateRecipe();
                             return true;
+                        } else if (selection == SelectionPlace.HANDSTONE) {
+                            if (inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && inventory.isItemValid(SLOT_HANDSTONE, heldStack)) {
+                                playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(SLOT_HANDSTONE, heldStack));
+                                teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
+                                return true;
+                            }
+                            else if (!inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && heldStack.isEmpty() && playerIn.isSneaking()) {
+                                playerIn.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(SLOT_HANDSTONE));
+                                ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
+                                teQuern.insertOrSwapItem(SLOT_HANDSTONE, ItemStack.EMPTY);
+                                teQuern.insertOrSwapItem(SLOT_INPUT, ItemStack.EMPTY);
+                                if (!input.isEmpty()) spawnAsEntity(world, pos, input);
+                                teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
+                                teQuern.setAndUpdateSlots(SLOT_INPUT);
+                                return true;
+                            }
+
                         }
-                    } else if (selection == SelectionPlace.INPUT_SLOT) {
-                        playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(TEQuern.SLOT_INPUT, heldStack));
-                        teQuern.setAndUpdateSlots(TEQuern.SLOT_INPUT);
-                        return true;
-                    } else if (selection == SelectionPlace.HANDSTONE) {
-                        if (inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && inventory.isItemValid(SLOT_HANDSTONE, heldStack)) {
-                            playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(SLOT_HANDSTONE, heldStack));
-                            teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
-                            return true;
-                        }
-                        else if (!inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty() && heldStack.isEmpty() && playerIn.isSneaking()) {
-                            playerIn.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(SLOT_HANDSTONE));
-                            ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
-                            teQuern.insertOrSwapItem(SLOT_HANDSTONE, ItemStack.EMPTY);
-                            teQuern.insertOrSwapItem(SLOT_INPUT, ItemStack.EMPTY);
-                            if (!input.isEmpty()) spawnAsEntity(world, pos, input);
-                            teQuern.setAndUpdateSlots(SLOT_HANDSTONE);
-                            teQuern.setAndUpdateSlots(SLOT_INPUT);
-                            return true;
-                        }
-                    } else if (selection == SelectionPlace.BASE && !inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).isEmpty()) {
+                    }
+                    if (selection == SelectionPlace.BASE && !inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).isEmpty()) {
                         ItemHandlerHelper.giveItemToPlayer(playerIn, inventory.extractItem(TEQuern.SLOT_OUTPUT, inventory.getStackInSlot(TEQuern.SLOT_OUTPUT).getCount(), false));
                         teQuern.setAndUpdateSlots(TEQuern.SLOT_OUTPUT);
                         return true;

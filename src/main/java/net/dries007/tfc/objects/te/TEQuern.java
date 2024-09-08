@@ -9,6 +9,7 @@ import net.dries007.tfc.api.capability.food.CapabilityFood;
 import net.dries007.tfc.api.recipes.quern.QuernRecipe;
 import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.objects.items.ItemsTFC;
+import net.dries007.tfc.objects.items.rock.ItemHandstone;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
@@ -23,6 +24,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static net.minecraft.init.SoundEvents.*;
@@ -37,6 +39,8 @@ public class TEQuern extends TEInventory implements ITickable {
     private boolean hasHandstone;
 
     private INBTSerializable<NBTTagCompound> handstoneNBT = null;
+
+    private QuernRecipe recipe = null;
 
     public TEQuern() {
         super(3);
@@ -78,9 +82,12 @@ public class TEQuern extends TEInventory implements ITickable {
         markForBlockUpdate();
         if (slot == SLOT_HANDSTONE) {
             ItemStack handstoneStack = inventory.getStackInSlot(slot);
+            ItemHandstone<?> handstone = (ItemHandstone<?>) handstoneStack.getItem();
             hasHandstone = !handstoneStack.isEmpty();
-            if (hasHandstone) handstoneNBT = ((IHandstone) handstoneStack.getItem()).createNBT(this.world, this.pos, this);
-            else handstoneNBT = null;
+            if (hasHandstone && handstone.hasData(handstoneStack)) {
+                if (handstoneNBT == null) handstoneNBT = handstone.createNBT(this.world, this.pos, this);
+            }
+            else this.handstoneNBT = null;
         }
         super.setAndUpdateSlots(slot);
     }
@@ -91,9 +98,16 @@ public class TEQuern extends TEInventory implements ITickable {
         super.readFromNBT(nbt);
         hasHandstone = !inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty();
         if (hasHandstone) {
-            ItemStack handstone = inventory.getStackInSlot(SLOT_HANDSTONE);
-            handstoneNBT = ((IHandstone) handstone.getItem()).createNBT(this.world, this.pos, this);
+            ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+            ItemHandstone<?> handstoneItem = (ItemHandstone<?>) handstoneStack.getItem();
+            if (handstoneItem.hasData(handstoneStack)) {
+                this.handstoneNBT = handstoneItem.createNBT(this.world, this.pos, this);
+            }
             if (handstoneNBT != null) handstoneNBT.deserializeNBT(nbt.getCompoundTag("handstoneNBT"));
+        }
+        ItemStack input = inventory.getStackInSlot(SLOT_INPUT);
+        if (!input.isEmpty()) {
+            this.recipe = QuernRecipe.get(input);
         }
     }
 
@@ -138,12 +152,6 @@ public class TEQuern extends TEInventory implements ITickable {
 
     @Override
     public void update() {
-        if (handstoneNBT != null) {
-            ItemStack stack = inventory.getStackInSlot(SLOT_HANDSTONE);
-            IHandstone handstone = (IHandstone) stack.getItem();
-            handstone.update(this.world, this.pos, this, stack, handstoneNBT);
-        }
-
         if (rotationTimer > 0) {
             rotationTimer--;
 
@@ -163,6 +171,12 @@ public class TEQuern extends TEInventory implements ITickable {
                 setAndUpdateSlots(SLOT_HANDSTONE);
             }
         }
+
+        if (handstoneNBT != null) {
+            ItemStack stack = inventory.getStackInSlot(SLOT_HANDSTONE);
+            IHandstone handstone = (IHandstone) stack.getItem();
+            handstone.update(this.world, this.pos, this, stack, handstoneNBT);
+        }
     }
 
     @Nonnull
@@ -171,20 +185,41 @@ public class TEQuern extends TEInventory implements ITickable {
         return new AxisAlignedBB(getPos(), getPos().add(1, 2, 1));
     }
 
+    public boolean isSlotFull(int slot) {
+        ItemStack stack = this.inventory.getStackInSlot(slot);
+        if (stack.isEmpty()) return false;
+        int stackSize = stack.getCount();
+        return stackSize == stack.getMaxStackSize() || stackSize == this.inventory.getSlotLimit(slot);
+    }
+
+    public boolean hasRecipe() {
+        return this.recipe != null;
+    }
+
+    @Nullable
+    public QuernRecipe getRecipe() {
+        return this.recipe;
+    }
+
+    public void updateRecipe() {
+        if (this.recipe == null) {
+            ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
+            if (!inputStack.isEmpty()) this.recipe = QuernRecipe.get(inputStack);
+        }
+    }
+
     private void grindItem() {
-        ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
-        if (!inputStack.isEmpty()) {
-            QuernRecipe recipe = QuernRecipe.get(inputStack);
-            if (recipe != null && !world.isRemote) {
-                inputStack.shrink(recipe.getIngredients().get(0).getAmount());
-                ItemStack outputStack = recipe.getOutputItem(inputStack);
-                outputStack = inventory.insertItem(SLOT_OUTPUT, outputStack, false);
-                inventory.setStackInSlot(SLOT_OUTPUT, CapabilityFood.mergeItemStacksIgnoreCreationDate(inventory.getStackInSlot(SLOT_OUTPUT), outputStack));
-                if (!outputStack.isEmpty()) {
-                    // Still having leftover items, dumping in world
-                    InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY() + 1, pos.getZ(), outputStack);
-                }
+        if (recipe != null && !world.isRemote) {
+            ItemStack inputStack = inventory.getStackInSlot(SLOT_INPUT);
+            inputStack.shrink(recipe.getIngredients().get(0).getAmount());
+            ItemStack outputStack = recipe.getOutputItem(inputStack);
+            outputStack = inventory.insertItem(SLOT_OUTPUT, outputStack, false);
+            inventory.setStackInSlot(SLOT_OUTPUT, CapabilityFood.mergeItemStacksIgnoreCreationDate(inventory.getStackInSlot(SLOT_OUTPUT), outputStack));
+            if (!outputStack.isEmpty()) {
+                // Still having leftover items, dumping in world
+                InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY() + 1, pos.getZ(), outputStack);
             }
+            if (inputStack.isEmpty()) this.recipe = null;
         }
     }
 }
