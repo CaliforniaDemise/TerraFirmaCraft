@@ -173,9 +173,9 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
             IItemHandler inventory = Objects.requireNonNull(teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
             ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
             IHandstone handstone = (IHandstone) handstoneStack.getItem();
-            AxisAlignedBB HANDSTONE_BB = handstone.getBoundingBox(world, pos, teQuern, entityIn, handstoneStack);
-            if (HANDSTONE_BB != null) {
-                addCollisionBoxToList(pos, entityBox, collidingBoxes, HANDSTONE_BB);
+            AxisAlignedBB[] aabbs = handstone.getCollisionBoxes(world, pos, teQuern, entityIn, handstoneStack);
+            for (AxisAlignedBB aabb : aabbs) {
+                addCollisionBoxToList(pos, entityBox, collidingBoxes, aabb);
             }
         }
     }
@@ -205,9 +205,10 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
                 IItemHandler inventory = teQuern.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
                 if (inventory != null) {
                     if (selection == SelectionPlace.HANDLE) {
-                        teQuern.grind(playerIn);
-                        world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
-                        return true;
+                        if (teQuern.grind(playerIn, hand)) {
+                            world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
+                            return true;
+                        }
                     } else if (selection == SelectionPlace.INPUT_SLOT) {
                         playerIn.setHeldItem(EnumHand.MAIN_HAND, teQuern.insertOrSwapItem(TEQuern.SLOT_INPUT, heldStack));
                         teQuern.setAndUpdateSlots(TEQuern.SLOT_INPUT);

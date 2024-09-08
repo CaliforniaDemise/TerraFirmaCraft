@@ -9,17 +9,18 @@ import net.dries007.tfc.api.capability.food.CapabilityFood;
 import net.dries007.tfc.api.recipes.quern.QuernRecipe;
 import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.objects.items.ItemsTFC;
-import net.dries007.tfc.util.OreDictionaryHelper;
-import net.minecraft.entity.passive.EntityCow;
+import net.dries007.tfc.util.Helpers;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -35,6 +36,8 @@ public class TEQuern extends TEInventory implements ITickable {
     private int rotationTimer;
     private boolean hasHandstone;
 
+    private INBTSerializable<NBTTagCompound> handstoneNBT = null;
+
     public TEQuern() {
         super(3);
         rotationTimer = 0;
@@ -47,6 +50,10 @@ public class TEQuern extends TEInventory implements ITickable {
         }
         inventory.setStackInSlot(slot, playerStack);
         return quernStack;
+    }
+
+    public INBTSerializable<NBTTagCompound> getHandstoneNBT() {
+        return handstoneNBT;
     }
 
     @Override
@@ -70,7 +77,10 @@ public class TEQuern extends TEInventory implements ITickable {
     public void setAndUpdateSlots(int slot) {
         markForBlockUpdate();
         if (slot == SLOT_HANDSTONE) {
-            hasHandstone = !inventory.getStackInSlot(slot).isEmpty();
+            ItemStack handstoneStack = inventory.getStackInSlot(slot);
+            hasHandstone = !handstoneStack.isEmpty();
+            if (hasHandstone) handstoneNBT = ((IHandstone) handstoneStack.getItem()).createNBT(this.world, this.pos, this);
+            else handstoneNBT = null;
         }
         super.setAndUpdateSlots(slot);
     }
@@ -80,12 +90,18 @@ public class TEQuern extends TEInventory implements ITickable {
         rotationTimer = nbt.getInteger("rotationTimer");
         super.readFromNBT(nbt);
         hasHandstone = !inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty();
+        if (hasHandstone) {
+            ItemStack handstone = inventory.getStackInSlot(SLOT_HANDSTONE);
+            handstoneNBT = ((IHandstone) handstone.getItem()).createNBT(this.world, this.pos, this);
+            if (handstoneNBT != null) handstoneNBT.deserializeNBT(nbt.getCompoundTag("handstoneNBT"));
+        }
     }
 
     @Override
     @Nonnull
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setInteger("rotationTimer", rotationTimer);
+        if (handstoneNBT != null) nbt.setTag("handstoneNBT", handstoneNBT.serializeNBT());
         return super.writeToNBT(nbt);
     }
 
@@ -98,6 +114,10 @@ public class TEQuern extends TEInventory implements ITickable {
         return rotationTimer;
     }
 
+    public void setRotationTimer(int rotationTimer) {
+        this.rotationTimer = rotationTimer;
+    }
+
     public boolean isGrinding() {
         return rotationTimer > 0;
     }
@@ -106,25 +126,31 @@ public class TEQuern extends TEInventory implements ITickable {
         return hasHandstone;
     }
 
-    public void grind(EntityPlayer player) {
+    public boolean grind(EntityPlayer player, EnumHand hand) {
         ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
         IHandstone handstone = (IHandstone) handstoneStack.getItem();
-        if (handstone.canUse(this.world, this.pos, this, player, handstoneStack)) {
-            this.rotationTimer = 90;
-            handstone.use(this.world, this.pos, this, player, handstoneStack);
-            markForBlockUpdate();
+        if (handstone.canUse(this.world, this.pos, this, player, hand, handstoneStack, handstoneNBT)) {
+            handstone.use(this.world, this.pos, this, player, hand, handstoneStack, handstoneNBT);
+            return true;
         }
+        return false;
     }
 
     @Override
     public void update() {
+        if (handstoneNBT != null) {
+            ItemStack stack = inventory.getStackInSlot(SLOT_HANDSTONE);
+            IHandstone handstone = (IHandstone) stack.getItem();
+            handstone.update(this.world, this.pos, this, stack, handstoneNBT);
+        }
+
         if (rotationTimer > 0) {
             rotationTimer--;
 
             if (rotationTimer == 0) {
                 grindItem();
                 world.playSound(null, pos, ENTITY_ARMORSTAND_FALL, SoundCategory.BLOCKS, 1.0f, 0.8f);
-                inventory.getStackInSlot(SLOT_HANDSTONE).damageItem(1, new EntityCow(world));
+                Helpers.damageItem(inventory.getStackInSlot(SLOT_HANDSTONE));
 
                 if (inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty()) {
                     for (int i = 0; i < 15; i++) {

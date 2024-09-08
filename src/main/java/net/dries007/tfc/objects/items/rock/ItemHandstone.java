@@ -6,14 +6,18 @@ import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.objects.items.ItemCraftingTool;
 import net.dries007.tfc.objects.te.TEQuern;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 
-public class ItemHandstone extends ItemCraftingTool implements IHandstone {
+public class ItemHandstone<T extends INBTSerializable<NBTTagCompound>> extends ItemCraftingTool implements IHandstone<T> {
 
     private static final AxisAlignedBB HANDSTONE_AABB = new AxisAlignedBB(0.1875D, 0.625D, 0.1875D, 0.8125D, 0.86D, 0.8125D);
     private static final AxisAlignedBB HANDLE_AABB = new AxisAlignedBB(0.27125D, 0.86D, 0.27125D, 0.335D, 1.015D, 0.335D);
@@ -31,5 +35,11 @@ public class ItemHandstone extends ItemCraftingTool implements IHandstone {
     @Override
     public AxisAlignedBB getHandleBoundingBox(World world, BlockPos pos, TEQuern quern, Entity entity, ItemStack stack) {
         return HANDLE_AABB;
+    }
+
+    @Override
+    public void use(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable INBTSerializable<NBTTagCompound> handstoneNBT) {
+        quern.setRotationTimer(90);
+        quern.markForBlockUpdate();
     }
 }

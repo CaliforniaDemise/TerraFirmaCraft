@@ -15,9 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockStructure;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityPolarBear;
 import net.minecraft.entity.passive.*;
@@ -144,6 +142,42 @@ public final class Helpers {
         }
         return null;
     }
+
+    @Nullable
+    public static EntityLiving getLeashedEntity(World world, Entity player, BlockPos pos) {
+        int i = pos.getX();
+        int j = pos.getY();
+        int k = pos.getZ();
+        for (EntityLiving entityLiving : world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)i - 7.0D, (double)j - 7.0D, (double)k - 7.0D, (double)i + 7.0D, (double)j + 7.0D, (double)k + 7.0D))) {
+            if (entityLiving.getLeashed() && entityLiving.getLeashHolder() == player) {
+                return entityLiving;
+            }
+        }
+        return null;
+    }
+
+//    EntityLeashKnot entityleashknot = EntityLeashKnot.getKnotForPosition(worldIn, fence);
+//    boolean flag = false;
+//    double d0 = 7.0D;
+//    int i = fence.getX();
+//    int j = fence.getY();
+//    int k = fence.getZ();
+//
+//        for (EntityLiving entityliving : worldIn.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)i - 7.0D, (double)j - 7.0D, (double)k - 7.0D, (double)i + 7.0D, (double)j + 7.0D, (double)k + 7.0D)))
+//    {
+//        if (entityliving.getLeashed() && entityliving.getLeashHolder() == player)
+//        {
+//            if (entityleashknot == null)
+//            {
+//                entityleashknot = EntityLeashKnot.createKnot(worldIn, fence);
+//            }
+//
+//            entityliving.setLeashHolder(entityleashknot, true);
+//            flag = true;
+//        }
+//    }
+//
+//        return flag;
 
     /**
      * Copy from Item#rayTrace
