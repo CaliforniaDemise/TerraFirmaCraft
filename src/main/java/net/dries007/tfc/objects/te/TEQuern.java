@@ -22,6 +22,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -46,11 +47,34 @@ public class TEQuern extends TEInventory implements ITickable {
 
     public ItemStack insertOrSwapItem(int slot, ItemStack playerStack) {
         ItemStack quernStack = inventory.getStackInSlot(slot);
-        if (quernStack.isEmpty() || (playerStack.isStackable() && quernStack.isStackable() && quernStack.getItem() == playerStack.getItem() && (!playerStack.getHasSubtypes() || playerStack.getMetadata() == quernStack.getMetadata()) && ItemStack.areItemStackTagsEqual(playerStack, quernStack))) {
-            return inventory.insertItem(slot, playerStack, false);
+        if (!playerStack.isEmpty()) {
+            if (!this.isItemValid(slot, playerStack)) return playerStack;
+            if (quernStack.isEmpty()) {
+                return this.inventory.insertItem(slot, playerStack, false);
+            }
+            else if (playerStack.isStackable() && ItemStack.areItemStacksEqual(quernStack, playerStack)) {
+                int toAdd = Math.min(quernStack.getMaxStackSize() - quernStack.getCount(), playerStack.getCount());
+                quernStack.setCount(quernStack.getCount() + toAdd);
+                playerStack.shrink(toAdd);
+                if (playerStack.getCount() == 0) playerStack = ItemStack.EMPTY;
+                return playerStack;
+            }
         }
-        inventory.setStackInSlot(slot, playerStack);
-        return quernStack;
+        if (!quernStack.isEmpty()) {
+            if (playerStack.isEmpty()) {
+                this.inventory.setStackInSlot(slot, ItemStack.EMPTY);
+                return quernStack;
+            }
+            else if (playerStack.isStackable() && ItemStack.areItemStacksEqual(quernStack, playerStack)) {
+                int toAdd = Math.min(playerStack.getMaxStackSize() - playerStack.getCount(), quernStack.getCount());
+                playerStack.setCount(playerStack.getCount() + toAdd);
+                quernStack.shrink(toAdd);
+                if (quernStack.getCount() == 0) this.inventory.setStackInSlot(slot, ItemStack.EMPTY);
+                return playerStack;
+            }
+        }
+
+        return playerStack;
     }
 
     public INBTSerializable<NBTTagCompound> getHandstoneNBT() {

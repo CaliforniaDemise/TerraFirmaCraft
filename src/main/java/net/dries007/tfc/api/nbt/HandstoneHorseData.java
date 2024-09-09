@@ -18,8 +18,23 @@ public class HandstoneHorseData implements INBTSerializable<NBTTagCompound> {
     private EntityCreature worker = null;
     private Vec3d[] locations = null;
 
+    private int checkTime = 0;
+
     public HandstoneHorseData(BlockPos pos) {
         this.pos = pos;
+    }
+
+    public void update() {
+        if (checkTime != 0) {
+            this.checkTime--;
+        }
+    }
+
+
+    public boolean shouldCheck() {
+        boolean check = this.checkTime == 0;
+        if (check) this.checkTime = 40;
+        return check;
     }
 
     public BlockPos getPos() {
