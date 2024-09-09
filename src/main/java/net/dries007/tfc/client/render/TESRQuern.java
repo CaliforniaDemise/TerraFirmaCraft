@@ -93,7 +93,7 @@ public class TESRQuern extends TileEntitySpecialRenderer<TEQuern> {
             }
 
             if (!input.isEmpty()) {
-                double height = (handstone.isEmpty()) ? 0.75 : 0.875;
+                double height = (handstone.isEmpty()) ? 0.65 : 0.8;
                 GlStateManager.enableRescaleNormal();
                 GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1f);
                 GlStateManager.enableBlend();
