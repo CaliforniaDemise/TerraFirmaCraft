@@ -79,11 +79,6 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
             creature.setHomePosAndDistance(pos, 3);
             ItemStack input = quern.getStackInSlot(TEQuern.SLOT_INPUT);
             if (!input.isEmpty() && !quern.isSlotFull(TEQuern.SLOT_OUTPUT) && quern.getRotationTimer() == 0) {
-                if (handstoneNBT.shouldCheck()) {
-                    if (!checkArea(world, pos, handstoneNBT)) return;
-                }
-                else handstoneNBT.update();
-
                 quern.setRotationTimer(90);
                 quern.markForBlockUpdate();
                 world.playSound(null, pos, TFCSounds.QUERN_USE, SoundCategory.BLOCKS, 1, 1 + ((world.rand.nextFloat() - world.rand.nextFloat()) / 16));
@@ -98,19 +93,6 @@ public class ItemHandstoneHorse extends ItemHandstone<HandstoneHorseData> {
                 }
             }
         }
-    }
-
-    private boolean checkArea(World world, BlockPos pos, HandstoneHorseData data) {
-        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        for (int i = -3; i < 4; i++) {
-            for (int y = 0; y < 3; y++) {
-                if (!world.isAirBlock(p.setPos(pos.getX() + i, pos.getY() + y, pos.getZ() + 3))) return false;
-                if (!world.isAirBlock(p.setPos(pos.getX() + i, pos.getY() + y, pos.getZ() - 3))) return false;
-                if (!world.isAirBlock(p.setPos(pos.getX() + 3, pos.getY() + y, pos.getZ() + i))) return false;
-                if (!world.isAirBlock(p.setPos(pos.getX() - 3, pos.getY() + y, pos.getZ() + i))) return false;
-            }
-        }
-        return true;
     }
 
     @Override
