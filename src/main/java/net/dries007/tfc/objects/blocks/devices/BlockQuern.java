@@ -24,11 +24,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -57,7 +59,6 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
      * Gets the selection place player is looking at
      * Used for interaction / selection box drawing
      */
-    private static Logger logger = LogManager.getLogger("test");
     private static SelectionPlace getPlayerSelection(World world, BlockPos pos, EntityPlayer player) {
         // This will compute a line from the camera center (crosshair) starting at the player eye pos and a little after this block
         // so we can grab the exact point regardless from which face player is looking from
@@ -261,6 +262,25 @@ public class BlockQuern extends Block implements IItemSize, IHighlightHandler {
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
         return new TEQuern();
+    }
+
+    @Override
+    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player) {
+        TEQuern quern = (TEQuern) worldIn.getTileEntity(pos);
+        if (quern == null) return;
+        quern.onPlayerBreak(player);
+    }
+
+    public void explosionDestroy(World world, BlockPos pos, Explosion explosion) {
+        TEQuern quern = (TEQuern) world.getTileEntity(pos);
+        if (quern == null) return;
+        quern.onExplosionBreak(explosion);
+    }
+
+    @Override
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+        this.explosionDestroy(world, pos, explosion);
+        super.onBlockExploded(world, pos, explosion);
     }
 
     @Override

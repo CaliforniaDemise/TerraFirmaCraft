@@ -9,7 +9,6 @@ import net.dries007.tfc.api.capability.food.CapabilityFood;
 import net.dries007.tfc.api.recipes.quern.QuernRecipe;
 import net.dries007.tfc.api.util.IHandstone;
 import net.dries007.tfc.objects.items.ItemsTFC;
-import net.dries007.tfc.objects.items.rock.ItemHandstone;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
@@ -21,6 +20,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.Explosion;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
@@ -81,9 +81,9 @@ public class TEQuern extends TEInventory implements ITickable {
             ItemStack handstoneStack = inventory.getStackInSlot(slot);
             hasHandstone = !handstoneStack.isEmpty();
             if (hasHandstone) {
-                ItemHandstone<?> handstone = (ItemHandstone<?>) handstoneStack.getItem();
-                if (handstone.hasData(handstoneStack)) {
-                    if (handstoneNBT == null) handstoneNBT = handstone.createNBT(this.world, this.pos, this);
+                IHandstone<?> handstone = (IHandstone<?>) handstoneStack.getItem();
+                if (handstone.hasData(this.world, this.pos, this, handstoneStack)) {
+                    if (handstoneNBT == null) handstoneNBT = handstone.createNBT(this.world, this.pos, this, handstoneStack);
                 }
                 else handstoneNBT = null;
             }
@@ -99,9 +99,9 @@ public class TEQuern extends TEInventory implements ITickable {
         hasHandstone = !inventory.getStackInSlot(SLOT_HANDSTONE).isEmpty();
         if (hasHandstone) {
             ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
-            ItemHandstone<?> handstoneItem = (ItemHandstone<?>) handstoneStack.getItem();
-            if (handstoneItem.hasData(handstoneStack)) {
-                this.handstoneNBT = handstoneItem.createNBT(this.world, this.pos, this);
+            IHandstone<?> handstoneItem = (IHandstone<?>) handstoneStack.getItem();
+            if (handstoneItem.hasData(this.world, this.pos, this, handstoneStack)) {
+                this.handstoneNBT = handstoneItem.createNBT(this.world, this.pos, this, handstoneStack);
             }
             if (handstoneNBT != null) handstoneNBT.deserializeNBT(nbt.getCompoundTag("handstoneNBT"));
         }
@@ -138,9 +138,9 @@ public class TEQuern extends TEInventory implements ITickable {
 
     public boolean grind(EntityPlayer player, EnumHand hand) {
         ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
-        IHandstone handstone = (IHandstone) handstoneStack.getItem();
-        if (handstone.canUse(this.world, this.pos, this, player, hand, handstoneStack, handstoneNBT)) {
-            handstone.use(this.world, this.pos, this, player, hand, handstoneStack, handstoneNBT);
+        IHandstone<INBTSerializable<NBTTagCompound>> handstone = (IHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
+        if (handstone.canUse(this.world, this.pos, this, player, hand, handstoneStack, this.handstoneNBT)) {
+            handstone.use(this.world, this.pos, this, player, hand, handstoneStack, this.handstoneNBT);
             return true;
         }
         return false;
@@ -182,6 +182,22 @@ public class TEQuern extends TEInventory implements ITickable {
         return new AxisAlignedBB(getPos(), getPos().add(1, 2, 1));
     }
 
+    public void onPlayerBreak(EntityPlayer player) {
+        ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+        if (!handstoneStack.isEmpty()) {
+            IHandstone<INBTSerializable<NBTTagCompound>> handstone = (IHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
+            handstone.onPlayerBreak(this.world, this.pos, player, this, handstoneStack, this.handstoneNBT);
+        }
+    }
+
+    public void onExplosionBreak(Explosion explosion) {
+        ItemStack handstoneStack = inventory.getStackInSlot(SLOT_HANDSTONE);
+        if (!handstoneStack.isEmpty()) {
+            IHandstone<INBTSerializable<NBTTagCompound>> handstone = (IHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
+            handstone.onExplosionBreak(this.world, this.pos, explosion, this, handstoneStack, this.handstoneNBT);
+        }
+    }
+
     public boolean isSlotFull(int slot) {
         ItemStack stack = this.inventory.getStackInSlot(slot);
         if (stack.isEmpty()) return false;
@@ -209,8 +225,8 @@ public class TEQuern extends TEInventory implements ITickable {
         }
         ItemStack handstoneStack = this.inventory.getStackInSlot(SLOT_HANDSTONE);
         if (!handstoneStack.isEmpty()) {
-            ItemHandstone<INBTSerializable<NBTTagCompound>> handstone = (ItemHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
-            handstone.afterGrind(this.world, this.pos, this, this.handstoneNBT);
+            IHandstone<INBTSerializable<NBTTagCompound>> handstone = (IHandstone<INBTSerializable<NBTTagCompound>>) handstoneStack.getItem();
+            handstone.afterGrind(this.world, this.pos, this, handstoneStack, this.handstoneNBT);
         }
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -16,15 +17,31 @@ import javax.annotation.Nullable;
 
 public interface IHandstone<T extends INBTSerializable<NBTTagCompound>> {
 
-    default boolean canUse(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable INBTSerializable<NBTTagCompound> handstoneNBT) {
+    default boolean canUse(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable T handstoneNBT) {
         return true;
     }
 
-    default void use(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable INBTSerializable<NBTTagCompound> handstoneNBT) {}
+    default void use(World world, BlockPos pos, TEQuern quern, EntityPlayer player, EnumHand hand, ItemStack stack, @Nullable T handstoneNBT) {}
 
     default void update(World world, BlockPos pos, TEQuern quern, ItemStack stack, @Nullable T handstoneNBT) {}
 
-    default T createNBT(World world, BlockPos pos, TEQuern quern) {
+    default void afterGrind(World world, BlockPos pos, TEQuern quern, ItemStack stack, T handstoneNBT) {}
+
+    default void onBreak(World world, BlockPos pos, TEQuern quern, ItemStack stack, T handstoneNBT) {}
+
+    default void onPlayerBreak(World world, BlockPos pos, EntityPlayer player, TEQuern quern, ItemStack stack, T handstoneNBT) {
+        this.onBreak(world, pos, quern, stack, handstoneNBT);
+    }
+
+    default void onExplosionBreak(World world, BlockPos pos, Explosion explosion, TEQuern quern, ItemStack stack, T handstoneNBT) {
+        this.onBreak(world, pos, quern, stack, handstoneNBT);
+    }
+
+    default boolean hasData(World world, BlockPos pos, TEQuern quern, ItemStack stack) {
+        return false;
+    }
+
+    default T createNBT(World world, BlockPos pos, TEQuern quern, ItemStack stack) {
         return null;
     }
 
