@@ -29,9 +29,7 @@ import net.dries007.tfc.objects.items.metal.ItemMetal;
 import net.dries007.tfc.objects.items.metal.ItemMetalBucket;
 import net.dries007.tfc.objects.items.metal.ItemOreTFC;
 import net.dries007.tfc.objects.items.metal.ItemSmallOre;
-import net.dries007.tfc.objects.items.rock.ItemBrickTFC;
-import net.dries007.tfc.objects.items.rock.ItemRock;
-import net.dries007.tfc.objects.items.rock.ItemRockToolHead;
+import net.dries007.tfc.objects.items.rock.*;
 import net.dries007.tfc.objects.items.wood.*;
 import net.dries007.tfc.util.OreDictionaryHelper;
 import net.dries007.tfc.util.agriculture.Crop;
@@ -337,7 +335,8 @@ public final class ItemsTFC {
         simpleItems.add(register(r, "firestarter", new ItemFireStarter(), CT_MISC));
         simpleItems.add(register(r, "straw", new ItemMisc(Size.SMALL, Weight.VERY_LIGHT, "kindling", "straw"), CT_MISC));
         simpleItems.add(register(r, "glass_shard", new ItemMisc(Size.VERY_SMALL, Weight.VERY_LIGHT), CT_MISC));
-        simpleItems.add(register(r, "handstone", new ItemCraftingTool(250, Size.NORMAL, Weight.VERY_HEAVY, "handstone"), CT_MISC));
+        simpleItems.add(register(r, "handstone", new ItemHandstone<>(250, Size.NORMAL, Weight.VERY_HEAVY, "handstone"), CT_MISC));
+        simpleItems.add(register(r, "handstone_horse", new ItemHandstoneHorse(250, Size.NORMAL, Weight.VERY_HEAVY, "handstone"), CT_MISC));
 
         simpleItems.add(register(r, "spindle", new ItemCraftingTool(40, Size.NORMAL, Weight.MEDIUM, "spindle"), CT_MISC));
 

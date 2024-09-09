@@ -15,9 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockStructure;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityPolarBear;
 import net.minecraft.entity.passive.*;
@@ -140,6 +138,19 @@ public final class Helpers {
                 if (pos.equals(seat.getPos())) {
                     return seat.getSittingEntity();
                 }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static EntityCreature getLeashedEntity(World world, Entity player, BlockPos pos) {
+        int i = pos.getX();
+        int j = pos.getY();
+        int k = pos.getZ();
+        for (EntityCreature entityLiving : world.getEntitiesWithinAABB(EntityCreature.class, new AxisAlignedBB((double)i - 7.0D, (double)j - 7.0D, (double)k - 7.0D, (double)i + 7.0D, (double)j + 7.0D, (double)k + 7.0D))) {
+            if (entityLiving.getLeashed() && entityLiving.getLeashHolder() == player) {
+                return entityLiving;
             }
         }
         return null;

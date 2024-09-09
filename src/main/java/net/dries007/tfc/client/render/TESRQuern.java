@@ -5,6 +5,7 @@
 
 package net.dries007.tfc.client.render;
 
+import net.dries007.tfc.objects.items.rock.ItemHandstone;
 import net.dries007.tfc.objects.te.TEQuern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,7 +15,9 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
@@ -85,35 +88,12 @@ public class TESRQuern extends TileEntitySpecialRenderer<TEQuern> {
             }
 
             if (!handstone.isEmpty()) {
-                int rotationTicks = te.getRotationTimer();
-                double center = (rotationTicks > 0) ? 0.497 + (te.getWorld().rand.nextDouble() * 0.006) : 0.5;
-
-                GlStateManager.enableRescaleNormal();
-                GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1f);
-                GlStateManager.enableBlend();
-                RenderHelper.enableStandardItemLighting();
-                GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(x + center, y + 0.75, z + center);
-
-                if (rotationTicks > 0) {
-                    GlStateManager.rotate((rotationTicks - partialTicks) * 4, 0, 1, 0);
-                }
-
-                IBakedModel handstoneModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(handstone, te.getWorld(), null);
-                handstoneModel = ForgeHooksClient.handleCameraTransforms(handstoneModel, ItemCameraTransforms.TransformType.FIXED, false);
-
-                GlStateManager.scale(1.25, 1.25, 1.25);
-                Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-                Minecraft.getMinecraft().getRenderItem().renderItem(handstone, handstoneModel);
-
-                GlStateManager.popMatrix();
-                GlStateManager.disableRescaleNormal();
-                GlStateManager.disableBlend();
+                ItemHandstone<INBTSerializable<NBTTagCompound>> handstoneItem = (ItemHandstone<INBTSerializable<NBTTagCompound>>) handstone.getItem();
+                handstoneItem.render(handstone, te, x, y, z, partialTicks, destroyStage, alpha, te.getHandstoneNBT());
             }
 
             if (!input.isEmpty()) {
-                double height = (handstone.isEmpty()) ? 0.75 : 0.875;
+                double height = (handstone.isEmpty()) ? 0.65 : 0.8;
                 GlStateManager.enableRescaleNormal();
                 GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1f);
                 GlStateManager.enableBlend();
