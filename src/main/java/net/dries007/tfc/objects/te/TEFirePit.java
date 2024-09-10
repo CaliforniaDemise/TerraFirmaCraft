@@ -282,6 +282,25 @@ public class TEFirePit extends TETickableInventory implements ICalendarTickable,
         }
     }
 
+    public ItemStack insertItem(int slot, ItemStack stack) {
+        ItemStack slotStack = this.inventory.getStackInSlot(slot);
+        if (!stack.isEmpty() && slotStack.isEmpty() && this.isItemValid(slot, stack)) {
+            return this.inventory.insertItem(slot, stack, false);
+        }
+        return stack;
+    }
+
+    // Used for Fire Pit Entity Item insertion
+    public ItemStack tryInsertingAll(ItemStack stack) {
+        ItemStack out = stack;
+        for (int i = SLOT_FUEL_INPUT; i <= SLOT_EXTRA_INPUT_END; i++) {
+            if (out.isEmpty()) return ItemStack.EMPTY;
+            if (i == SLOT_OUTPUT_1 || i == SLOT_OUTPUT_2) continue;
+            out = this.insertItem(i, out);
+        }
+        return out;
+    }
+
     @Override
     public void onCalendarUpdate(long deltaPlayerTicks) {
         IBlockState state = world.getBlockState(pos);
@@ -448,7 +467,7 @@ public class TEFirePit extends TETickableInventory implements ICalendarTickable,
             case SLOT_FUEL_INPUT: // Valid fuel if it is registered correctly
                 return FuelManager.isItemFuel(stack) && !FuelManager.isItemForgeFuel(stack);
             case SLOT_ITEM_INPUT: // Valid input as long as it can be heated
-                return stack.hasCapability(CapabilityItemHeat.ITEM_HEAT_CAPABILITY, null);
+                return this.attachedItemStack.isEmpty() && stack.hasCapability(CapabilityItemHeat.ITEM_HEAT_CAPABILITY, null);
             case SLOT_OUTPUT_1:
             case SLOT_OUTPUT_2: // Valid insert into output as long as it can hold fluids and is heat-able
                 return stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null) && stack.hasCapability(CapabilityItemHeat.ITEM_HEAT_CAPABILITY, null);
