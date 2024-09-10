@@ -114,6 +114,7 @@ public class ItemFireStarter extends ItemTFC {
     public void onUsingTick(ItemStack stack, EntityLivingBase entityLivingBase, int countLeft) {
         if (!(entityLivingBase instanceof EntityPlayer)) return;
         final EntityPlayer player = (EntityPlayer) entityLivingBase;
+        final World world = player.world;
         final RayTraceResult result = canStartFire(player.world, player);
         if (result == null) {
             player.resetActiveHand();
@@ -121,13 +122,13 @@ public class ItemFireStarter extends ItemTFC {
         }
         final int total = getMaxItemUseDuration(stack);
         final int count = total - countLeft;
-        final BlockPos pos = result.getBlockPos().offset(result.sideHit);
-        final World world = player.world;
+        BlockPos pos = result.getBlockPos();
+        if (!world.getBlockState(pos).getBlock().isReplaceable(world, pos)) pos.offset(result.sideHit);
         // Base chance
         float chance = (float) ConfigTFC.General.MISC.fireStarterChance;
         // Raining reduces chance by half
         if (world.isRainingAt(pos)) {
-            chance *= 0.5;
+            chance *= 0.5F;
         }
 
         if (world.isRemote) // Client
@@ -238,10 +239,9 @@ public class ItemFireStarter extends ItemTFC {
         if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK) {
             BlockPos pos = result.getBlockPos();
             final IBlockState current = world.getBlockState(pos);
-            if (current.isSideSolid(world, pos, result.sideHit) && !current.getMaterial().isLiquid()) {
-                if (world.isAirBlock(pos.offset(result.sideHit))) {
-                    return result;
-                }
+            if (!current.getMaterial().isLiquid()) {
+                if (current.getBlock().isReplaceable(world, pos)) return result;
+                if (current.isSideSolid(world, pos, result.sideHit) && world.isAirBlock(pos.offset(result.sideHit))) return result;
             }
         }
         return null;
