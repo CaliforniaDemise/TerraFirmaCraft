@@ -8,10 +8,10 @@ package net.dries007.tfc.objects.blocks.devices;
 import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
 import net.dries007.tfc.objects.blocks.property.ILightableBlock;
-import net.dries007.tfc.objects.items.ItemFireStarter;
 import net.dries007.tfc.objects.te.TEBloomery;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.block.Multiblock;
@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 import static net.minecraft.block.BlockTrapDoor.OPEN;
 
 @ParametersAreNonnullByDefault
-public class BlockBloomery extends BlockHorizontal implements IItemSize, ILightableBlock {
+public class BlockBloomery extends BlockHorizontal implements IItemSize, ILightableBlock, IIgnitable {
     //[horizontal index][basic shape / door1 / door2]
     private static final AxisAlignedBB[][] AABB =
         {
@@ -304,22 +304,24 @@ public class BlockBloomery extends BlockHorizontal implements IItemSize, ILighta
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!worldIn.isRemote && !state.getValue(LIT)) {
+            worldIn.setBlockState(pos, state.cycleProperty(OPEN));
+            worldIn.playSound(null, pos, SoundEvents.BLOCK_FENCE_GATE_CLOSE, SoundCategory.BLOCKS, 1.0f, 1.0f);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onIgnition(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand) {
         if (!worldIn.isRemote) {
-            if (!state.getValue(LIT)) {
-                worldIn.setBlockState(pos, state.cycleProperty(OPEN));
-                worldIn.playSound(null, pos, SoundEvents.BLOCK_FENCE_GATE_CLOSE, SoundCategory.BLOCKS, 1.0f, 1.0f);
-            }
             TEBloomery te = Helpers.getTE(worldIn, pos, TEBloomery.class);
-            if (te != null) {
-                if (!state.getValue(LIT) && te.canIgnite()) {
-                    ItemStack held = player.getHeldItem(hand);
-                    if (ItemFireStarter.onIgnition(held)) {
-                        TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
-                        worldIn.setBlockState(pos, state.withProperty(LIT, true).withProperty(OPEN, false));
-                        te.onIgnite();
-                        return true;
-                    }
+            if (te != null && !state.getValue(LIT) && te.canIgnite()) {
+                if (IIgnitable.super.onIgnition(worldIn, pos, state, player, hand)) {
+                    TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
+                    worldIn.setBlockState(pos, state.withProperty(LIT, true).withProperty(OPEN, false));
+                    te.onIgnite();
+                    return true;
                 }
             }
         }

@@ -6,6 +6,8 @@
 package net.dries007.tfc.objects.blocks.devices;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.dries007.tfc.api.types.IIgnitable;
+import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.property.ILightableBlock;
 import net.dries007.tfc.objects.items.ItemFireStarter;
 import net.dries007.tfc.objects.te.TEPitKiln;
@@ -21,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -47,7 +50,7 @@ import static net.dries007.tfc.objects.blocks.BlockPlacedItem.PLACED_ITEM_AABB;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BlockPitKiln extends Block implements ILightableBlock {
+public class BlockPitKiln extends Block implements ILightableBlock, IIgnitable {
     public static final PropertyBool FULL = PropertyBool.create("full");
 
     private static final AxisAlignedBB[] AABB_LEVELS = new AxisAlignedBB[]{
@@ -68,6 +71,19 @@ public class BlockPitKiln extends Block implements ILightableBlock {
         super(Material.CIRCUITS);
         setHardness(0.5f);
         setDefaultState(blockState.getBaseState().withProperty(FULL, false).withProperty(LIT, false));
+    }
+
+    @Override
+    public boolean onIgnition(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand) {
+        if (IIgnitable.super.onIgnition(world, pos, state, player, hand)) {
+            TEPitKiln te = Helpers.getTE(world, pos.down(), TEPitKiln.class);
+            if (te != null) {
+                te.tryLight();
+                TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

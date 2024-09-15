@@ -5,11 +5,11 @@
 
 package net.dries007.tfc.objects.blocks;
 
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.devices.BlockCharcoalForge;
 import net.dries007.tfc.objects.blocks.property.ILightableBlock;
-import net.dries007.tfc.objects.items.ItemFireStarter;
 import net.dries007.tfc.objects.te.TECharcoalForge;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.block.Block;
@@ -38,7 +38,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
 
 @ParametersAreNonnullByDefault
-public class BlockCharcoalPile extends Block implements ILightableBlock {
+public class BlockCharcoalPile extends Block implements ILightableBlock, IIgnitable {
     public static final Material CHARCOAL_MATERIAL = new Material(MapColor.BROWN);
 
     public static final PropertyInteger LAYERS = PropertyInteger.create("type", 1, 8);
@@ -153,9 +153,8 @@ public class BlockCharcoalPile extends Block implements ILightableBlock {
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (state.getValue(LAYERS) >= 7 && BlockCharcoalForge.isValid(world, pos) && ItemFireStarter.onIgnition(stack)) {
+    public boolean onIgnition(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand) {
+        if (state.getValue(LAYERS) >= 7 && BlockCharcoalForge.isValid(world, pos) && IIgnitable.super.onIgnition(world, pos, state, player, hand)) {
             if (!world.isRemote) {
                 TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
                 world.setBlockState(pos, BlocksTFC.CHARCOAL_FORGE.getDefaultState().withProperty(LIT, true));

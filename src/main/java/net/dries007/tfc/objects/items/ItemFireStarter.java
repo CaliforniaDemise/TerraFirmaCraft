@@ -9,14 +9,17 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.dries007.tfc.ConfigTFC;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.client.TFCSounds;
 import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
+import net.dries007.tfc.objects.blocks.property.ILightableBlock;
 import net.dries007.tfc.objects.te.TEFirePit;
 import net.dries007.tfc.objects.te.TELogPile;
 import net.dries007.tfc.objects.te.TEPitKiln;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.OreDictionaryHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -123,55 +126,46 @@ public class ItemFireStarter extends ItemTFC {
         final int total = getMaxItemUseDuration(stack);
         final int count = total - countLeft;
         BlockPos pos = result.getBlockPos();
-        if (!world.getBlockState(pos).getBlock().isReplaceable(world, pos)) pos.offset(result.sideHit);
-        // Base chance
-        float chance = (float) ConfigTFC.General.MISC.fireStarterChance;
-        // Raining reduces chance by half
-        if (world.isRainingAt(pos)) {
-            chance *= 0.5F;
+        IBlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+
+        if (!block.isReplaceable(world, pos) && !(block instanceof IIgnitable)) {
+            pos = pos.offset(result.sideHit);
+            state = world.getBlockState(pos);
+            block = state.getBlock();
         }
 
-        if (world.isRemote) // Client
-        {
-            if (itemRand.nextFloat() + 0.3 < count / (double) total) {
+        float chance = (float) ConfigTFC.General.MISC.fireStarterChance;
+        if (world.isRainingAt(pos)) chance *= 0.5F;
+
+        if (world.isRemote) { // Client
+            // Particles
+            if (itemRand.nextFloat() + 0.3F < count / (float) total) {
                 world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, result.hitVec.x, result.hitVec.y, result.hitVec.z, 0.0F, 0.1F, 0.0F);
             }
-            if (countLeft < 10 && itemRand.nextFloat() + 0.3 < count / (double) total) {
+            if (countLeft < 10 && itemRand.nextFloat() + 0.3F < count / (float) total) {
                 world.spawnParticle(EnumParticleTypes.FLAME, result.hitVec.x, result.hitVec.y, result.hitVec.z, 0.0F, 0.0F, 0.0F);
             }
-
+            // Sounds
             if (count % 3 == 1) {
                 player.playSound(TFCSounds.FIRE_STARTER, 0.5f, 0.05F);
             }
-        } else if (countLeft == 1) // Server, and last tick of use
-        {
-            stack.damageItem(1, player);
-            final IBlockState state = world.getBlockState(pos.down());
-            if (state.getBlock() == BlocksTFC.LOG_PILE) {
-                // Log pile
+        }
+        else if (countLeft == 1) { // Server, and last tick of use
+            if (block instanceof IIgnitable) {
                 if (itemRand.nextFloat() < chance) {
-                    world.setBlockState(pos.down(), state.withProperty(LIT, true));
-                    TELogPile te = Helpers.getTE(world, pos.down(), TELogPile.class);
-                    if (te != null) {
-                        te.light();
-                        TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
-                    }
-                    if (Blocks.FIRE.canPlaceBlockAt(world, pos)) {
-                        world.setBlockState(pos, Blocks.FIRE.getDefaultState());
-                    }
+                    ((IIgnitable) block).onIgnition(world, pos, state, player, player.getActiveHand());
                 }
-            } else if (state.getBlock() == BlocksTFC.PIT_KILN) {
-                // Pit Kiln
+            }
+            else if (block instanceof ILightableBlock && !state.getValue(LIT)) {
+                stack.damageItem(1, player);
                 if (itemRand.nextFloat() < chance) {
-                    TEPitKiln te = Helpers.getTE(world, pos.down(), TEPitKiln.class);
-                    if (te != null) {
-                        te.tryLight();
-                        TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
-                    }
+                    world.setBlockState(pos, state.withProperty(LIT, true));
                 }
-            } else {
+            }
+            else {
+                stack.damageItem(1, player);
                 // Try to make a fire pit
-
                 final List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos, pos.add(1, 2, 1)));
                 final List<EntityItem> stuffToUse = new ArrayList<>();
 

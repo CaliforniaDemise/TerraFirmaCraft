@@ -5,13 +5,13 @@
 
 package net.dries007.tfc.objects.blocks.devices;
 
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.api.util.IBellowsConsumerBlock;
 import net.dries007.tfc.client.TFCGuiHandler;
 import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.BlockCharcoalPile;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
 import net.dries007.tfc.objects.blocks.property.ILightableBlock;
-import net.dries007.tfc.objects.items.ItemFireStarter;
 import net.dries007.tfc.objects.te.TEBellows;
 import net.dries007.tfc.objects.te.TECharcoalForge;
 import net.dries007.tfc.util.Helpers;
@@ -53,7 +53,7 @@ import java.util.Random;
 import java.util.function.BiPredicate;
 
 @ParametersAreNonnullByDefault
-public class BlockCharcoalForge extends Block implements IBellowsConsumerBlock, ILightableBlock {
+public class BlockCharcoalForge extends Block implements IBellowsConsumerBlock, ILightableBlock, IIgnitable {
     private static final AxisAlignedBB AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D);
     private static final Multiblock CHARCOAL_FORGE_MULTIBLOCK;
 
@@ -232,11 +232,21 @@ public class BlockCharcoalForge extends Block implements IBellowsConsumerBlock, 
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!playerIn.isSneaking()) {
+            if (!worldIn.isRemote) {
+                TFCGuiHandler.openGui(worldIn, pos, playerIn, TFCGuiHandler.Type.CHARCOAL_FORGE);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onIgnition(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand) {
         if (!world.isRemote) {
             if (!state.getValue(LIT)) {
-                ItemStack held = player.getHeldItem(hand);
-                if (isValid(world, pos) && ItemFireStarter.onIgnition(held)) {
+                if (isValid(world, pos) && IIgnitable.super.onIgnition(world, pos, state, player, hand)) {
                     TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
                     world.setBlockState(pos, state.withProperty(LIT, true));
                     return true;

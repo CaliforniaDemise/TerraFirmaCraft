@@ -5,6 +5,7 @@
 
 package net.dries007.tfc.objects.blocks.devices;
 
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.api.types.Metal;
 import net.dries007.tfc.api.util.IBellowsConsumerBlock;
 import net.dries007.tfc.client.TFCGuiHandler;
@@ -13,7 +14,6 @@ import net.dries007.tfc.objects.blocks.BlockFireBrick;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
 import net.dries007.tfc.objects.blocks.metal.BlockMetalSheet;
 import net.dries007.tfc.objects.blocks.property.ILightableBlock;
-import net.dries007.tfc.objects.items.ItemFireStarter;
 import net.dries007.tfc.objects.te.TEBellows;
 import net.dries007.tfc.objects.te.TEBlastFurnace;
 import net.dries007.tfc.objects.te.TEMetalSheet;
@@ -25,7 +25,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -39,7 +38,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Predicate;
 
 @ParametersAreNonnullByDefault
-public class BlockBlastFurnace extends Block implements IBellowsConsumerBlock, ILightableBlock {
+public class BlockBlastFurnace extends Block implements IBellowsConsumerBlock, ILightableBlock, IIgnitable {
     private static final Multiblock BLAST_FURNACE_CHIMNEY;
 
     static {
@@ -124,21 +123,28 @@ public class BlockBlastFurnace extends Block implements IBellowsConsumerBlock, I
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!playerIn.isSneaking()) {
+            if (!worldIn.isRemote) {
+                TFCGuiHandler.openGui(worldIn, pos, playerIn, TFCGuiHandler.Type.BLAST_FURNACE);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onIgnition(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand) {
         if (!worldIn.isRemote) {
             if (!state.getValue(LIT)) {
                 TEBlastFurnace te = Helpers.getTE(worldIn, pos, TEBlastFurnace.class);
                 if (te == null)
                     return true;
-                ItemStack held = playerIn.getHeldItem(hand);
-                if (te.canIgnite() && ItemFireStarter.onIgnition(held)) {
+                if (te.canIgnite() && IIgnitable.super.onIgnition(worldIn, pos, state, playerIn, hand)) {
                     TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) playerIn, state.getBlock()); // Trigger lit block
                     worldIn.setBlockState(pos, state.withProperty(LIT, true));
                     //te.onIgnite();
                     return true;
                 }
-            }
-            if (!playerIn.isSneaking()) {
-                TFCGuiHandler.openGui(worldIn, pos, playerIn, TFCGuiHandler.Type.BLAST_FURNACE);
             }
         }
         return true;

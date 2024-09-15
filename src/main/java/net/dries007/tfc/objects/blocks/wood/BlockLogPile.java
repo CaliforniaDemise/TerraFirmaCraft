@@ -8,6 +8,7 @@ package net.dries007.tfc.objects.blocks.wood;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.dries007.tfc.ConfigTFC;
+import net.dries007.tfc.api.types.IIgnitable;
 import net.dries007.tfc.client.TFCGuiHandler;
 import net.dries007.tfc.objects.advancements.TFCTriggers;
 import net.dries007.tfc.objects.blocks.BlocksTFC;
@@ -46,7 +47,7 @@ import java.util.Random;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BlockLogPile extends Block implements ILightableBlock {
+public class BlockLogPile extends Block implements ILightableBlock, IIgnitable {
     private static final PropertyEnum<EnumFacing.Axis> AXIS = PropertyEnum.create("axis", EnumFacing.Axis.class, EnumFacing.Axis.X, EnumFacing.Axis.Z);
 
     // A simplified check for display (Patchouli) purposes
@@ -139,6 +140,7 @@ public class BlockLogPile extends Block implements ILightableBlock {
             // 2. Try and light the TE
             // 3. Open the GUI
             ItemStack stack = player.getHeldItem(hand);
+            // TODO FIX BLOCK LOG PILE
             if (!state.getValue(LIT) && side == EnumFacing.UP && world.getBlockState(pos.up()).getBlock().isReplaceable(world, pos) && ItemFireStarter.onIgnition(stack)) {
                 // Light the Pile
                 if (!world.isRemote) {
@@ -178,6 +180,20 @@ public class BlockLogPile extends Block implements ILightableBlock {
                 if (!world.isRemote) {
                     TFCGuiHandler.openGui(world, pos, player, TFCGuiHandler.Type.LOG_PILE);
                 }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onIgnition(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand) {
+        if (IIgnitable.super.onIgnition(world, pos, state, player, hand)) {
+            world.setBlockState(pos.down(), state.withProperty(LIT, true));
+            TELogPile te = Helpers.getTE(world, pos.down(), TELogPile.class);
+            if (te != null) {
+                te.light();
+                TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
                 return true;
             }
         }
