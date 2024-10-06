@@ -30,7 +30,6 @@ import net.dries007.tfc.objects.entity.EntityFallingBlockTFC;
 import net.dries007.tfc.objects.entity.animal.*;
 import net.dries007.tfc.objects.entity.projectile.EntityThrownJavelin;
 import net.dries007.tfc.util.calendar.CalendarTFC;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.climate.ClimateHelper;
 import net.dries007.tfc.util.climate.ClimateTFC;
 import net.dries007.tfc.util.skills.SmithingSkill;
@@ -61,6 +60,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -191,8 +191,8 @@ public class ClientEvents {
                     list.add(String.format("%sRegion: %s%.1f\u00b0C%s Avg: %s%.1f\u00b0C%s Min: %s%.1f\u00b0C%s Max: %s%.1f\u00b0C",
                         GRAY, WHITE, data.getRegionalTemp(), GRAY,
                         WHITE, data.getAverageTemp(), GRAY,
-                        WHITE, ClimateHelper.monthFactor(data.getRegionalTemp(), Month.JANUARY.getTemperatureModifier(), blockpos.getZ()), GRAY,
-                        WHITE, ClimateHelper.monthFactor(data.getRegionalTemp(), Month.JULY.getTemperatureModifier(), blockpos.getZ())));
+                        WHITE, ClimateHelper.monthFactor(data.getRegionalTemp(), CalendarTFC.getTemperatureModifier(Month.JANUARY), blockpos.getZ()), GRAY,
+                        WHITE, ClimateHelper.monthFactor(data.getRegionalTemp(), CalendarTFC.getTemperatureModifier(Month.JULY), blockpos.getZ())));
                     list.add(String.format("%sTemperature: %s%.1f\u00b0C Daily: %s%.1f\u00b0C",
                         GRAY, WHITE, ClimateTFC.getMonthlyTemp(blockpos),
                         WHITE, ClimateTFC.getActualTemp(blockpos)));

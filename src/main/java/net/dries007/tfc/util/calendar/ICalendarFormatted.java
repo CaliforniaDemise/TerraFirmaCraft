@@ -9,6 +9,7 @@ import net.dries007.tfc.TerraFirmaCraft;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import java.time.Month;
 
 public interface ICalendarFormatted extends ICalendar {
     /* Total calculation methods */
@@ -48,7 +49,8 @@ public interface ICalendarFormatted extends ICalendar {
 
     @Nonnull
     static Month getMonthOfYear(long time, long daysInMonth) {
-        return Month.valueOf((int) ((time / (TICKS_IN_DAY * daysInMonth)) % 12));
+        int value = (int) ((time / (TICKS_IN_DAY * daysInMonth)) % 12);
+        return Month.of(value + 1);
     }
 
     /**

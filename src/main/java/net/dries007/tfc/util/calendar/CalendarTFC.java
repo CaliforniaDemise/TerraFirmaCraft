@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
+import java.time.Month;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +51,43 @@ public final class CalendarTFC implements INBTSerializable<NBTTagCompound> {
 
     public static final String[] DAY_NAMES = new String[]{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
     public static final Map<String, String> BIRTHDAYS = new HashMap<>();
+
+    public static Month next(Month month) {
+        int index = month.ordinal() + 1;
+        index++;
+        if (index == 13) index = 1;
+        return Month.of(index);
+    }
+
+    public static float getTemperatureModifier(Month month) {
+        switch (month) {
+            case JANUARY: return 66.5f;
+            case JULY: return 27f;
+            case JUNE:
+            case AUGUST: return 29.5f;
+            case MAY:
+            case SEPTEMBER: return 38f;
+            case APRIL:
+            case OCTOBER: return 47.5f;
+            case MARCH:
+            case NOVEMBER: return 56f;
+            case FEBRUARY:
+            case DECEMBER: return 65.5f;
+            default: return 38f;
+        }
+    }
+
+    public static float getAverageTemperature() {
+        return 47.2f;
+    }
+
+    public static boolean isWithin(Month month, Month lowerBoundInclusive, Month upperBoundInclusive) {
+        if (lowerBoundInclusive.ordinal() <= upperBoundInclusive.ordinal()) {
+            return month.ordinal() >= lowerBoundInclusive.ordinal() && month.ordinal() <= upperBoundInclusive.ordinal();
+        }
+        // If comparing the range NOV - FEB (for example), then both above and below count
+        return month.ordinal() >= lowerBoundInclusive.ordinal() || month.ordinal() <= upperBoundInclusive.ordinal();
+    }
 
     static {
         // Original developers, all hail their glorious creation
@@ -253,8 +291,8 @@ public final class CalendarTFC implements INBTSerializable<NBTTagCompound> {
             }
             if (deltaWorldTime < 0) {
                 // Calendar is ahead, so jump world time
+                world.setWorldTime(world.getWorldTime() - deltaWorldTime);
                 if (debugCalendar) {
-                    world.setWorldTime(world.getWorldTime() - deltaWorldTime);
                     TerraFirmaCraft.getLog().info("Calendar is ahead by {} ticks, jumping world time to catch up", -deltaWorldTime);
                 }
             } else {

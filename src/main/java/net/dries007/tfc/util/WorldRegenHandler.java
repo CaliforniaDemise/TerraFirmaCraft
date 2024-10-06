@@ -17,12 +17,10 @@ import net.dries007.tfc.objects.te.TECropBase;
 import net.dries007.tfc.objects.te.TEPlacedItemFlat;
 import net.dries007.tfc.types.DefaultPlants;
 import net.dries007.tfc.util.calendar.CalendarTFC;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.climate.ClimateTFC;
 import net.dries007.tfc.world.classic.chunkdata.ChunkDataTFC;
 import net.dries007.tfc.world.classic.worldgen.WorldGenBerryBushes;
 import net.dries007.tfc.world.classic.worldgen.WorldGenPlantTFC;
-import net.dries007.tfc.world.classic.worldgen.WorldGenTrees;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -47,6 +45,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import java.time.Month;
 import java.util.*;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
@@ -73,7 +72,7 @@ public class WorldRegenHandler {
         ChunkDataTFC chunkDataTFC = ChunkDataTFC.get(event.getChunk());
         if (event.getWorld().provider.getDimension() == 0 && chunkDataTFC.isInitialized() && POSITIONS.size() < 1000) {
             //Only run this in the early months of each year
-            if (CalendarTFC.CALENDAR_TIME.getMonthOfYear().isWithin(Month.APRIL, Month.JULY) && !chunkDataTFC.isSpawnProtected() && CalendarTFC.CALENDAR_TIME.getTotalYears() > chunkDataTFC.getLastUpdateYear()) {
+            if (CalendarTFC.isWithin(CalendarTFC.CALENDAR_TIME.getMonthOfYear(), Month.APRIL, Month.JULY) && !chunkDataTFC.isSpawnProtected() && CalendarTFC.CALENDAR_TIME.getTotalYears() > chunkDataTFC.getLastUpdateYear()) {
                 POSITIONS.add(event.getChunk().getPos());
             }
         }
@@ -93,7 +92,7 @@ public class WorldRegenHandler {
                     IChunkProvider chunkProvider = event.world.getChunkProvider();
                     IChunkGenerator chunkGenerator = ((ChunkProviderServer) chunkProvider).chunkGenerator;
 
-                    if (CalendarTFC.CALENDAR_TIME.getMonthOfYear().isWithin(Month.APRIL, Month.JULY) && !chunkDataTFC.isSpawnProtected() && CalendarTFC.CALENDAR_TIME.getTotalYears() > chunkDataTFC.getLastUpdateYear()) {
+                    if (CalendarTFC.isWithin(CalendarTFC.CALENDAR_TIME.getMonthOfYear(), Month.APRIL, Month.JULY) && !chunkDataTFC.isSpawnProtected() && CalendarTFC.CALENDAR_TIME.getTotalYears() > chunkDataTFC.getLastUpdateYear()) {
                         if (ConfigTFC.General.WORLD_REGEN.sticksRocksModifier > 0) {
                             //Nuke any rocks and sticks in chunk.
                             removeAllPlacedItems(event.world, pos);

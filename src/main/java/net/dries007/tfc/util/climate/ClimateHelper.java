@@ -9,10 +9,10 @@ import net.dries007.tfc.ConfigTFC;
 import net.dries007.tfc.util.calendar.CalendarTFC;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.calendar.ICalendarFormatted;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.config.TemperatureMode;
 import net.minecraft.util.math.MathHelper;
 
+import java.time.Month;
 import java.util.Random;
 
 import static net.dries007.tfc.world.classic.WorldTypeTFC.SEALEVEL;
@@ -58,7 +58,7 @@ public class ClimateHelper {
         Month monthOfYear = ICalendarFormatted.getMonthOfYear(time, CalendarTFC.CALENDAR_TIME.getDaysInMonth());
 
         final float currentMonthFactor = monthFactor(regionalTemp, monthOfYear, z);
-        final float nextMonthFactor = monthFactor(regionalTemp, monthOfYear.next(), z);
+        final float nextMonthFactor = monthFactor(regionalTemp, CalendarTFC.next(monthOfYear), z);
 
         final float delta = (float) ICalendarFormatted.getDayOfMonth(time, CalendarTFC.CALENDAR_TIME.getDaysInMonth()) / CalendarTFC.CALENDAR_TIME.getDaysInMonth();
         // Affine combination to smooth temperature transition
@@ -92,7 +92,7 @@ public class ClimateHelper {
      * @return the month factor for temp calculation
      */
     public static float monthFactor(float regionalTemp, Month month, int z) {
-        return monthFactor(regionalTemp, month.getTemperatureModifier(), z);
+        return monthFactor(regionalTemp, CalendarTFC.getTemperatureModifier(month), z);
     }
 
     public static float monthFactor(float regionalTemp, float monthTempModifier, int z) {

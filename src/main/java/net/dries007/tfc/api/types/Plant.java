@@ -7,7 +7,6 @@ package net.dries007.tfc.api.types;
 
 import net.dries007.tfc.objects.blocks.plants.*;
 import net.dries007.tfc.util.calendar.CalendarTFC;
-import net.dries007.tfc.util.calendar.Month;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;

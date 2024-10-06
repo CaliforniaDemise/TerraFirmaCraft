@@ -18,7 +18,6 @@ import net.dries007.tfc.objects.te.TETickCounter;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.calendar.CalendarTFC;
 import net.dries007.tfc.util.calendar.ICalendar;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.climate.ClimateTFC;
 import net.dries007.tfc.world.classic.chunkdata.ChunkDataTFC;
 import net.minecraft.block.state.IBlockState;
@@ -28,6 +27,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +61,8 @@ public class FruitTreeProvider implements IWailaBlock {
                 }
             } else {
                 currentTooltip.add(new TextComponentTranslation("waila.tfc.agriculture.harvesting_months").getFormattedText());
-                for (Month month : Month.values()) {
+                for (int i = 1; i < 13; i++) {
+                    Month month = Month.of(i);
                     if (block.getTree().isHarvestMonth(month)) {
                         currentTooltip.add(TerraFirmaCraft.getProxy().getMonthName(month, true));
                     }

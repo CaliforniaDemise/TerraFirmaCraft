@@ -6,7 +6,6 @@
 package net.dries007.tfc.proxy;
 
 import net.dries007.tfc.util.calendar.CalendarTFC;
-import net.dries007.tfc.util.calendar.Month;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.World;
@@ -16,6 +15,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Month;
 
 @SuppressWarnings("unused")
 @SideOnly(Side.SERVER)

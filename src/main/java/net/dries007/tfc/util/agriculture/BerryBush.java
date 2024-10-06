@@ -9,9 +9,10 @@ import net.dries007.tfc.api.types.IBerryBush;
 import net.dries007.tfc.objects.items.food.ItemFoodTFC;
 import net.dries007.tfc.util.calendar.CalendarTFC;
 import net.dries007.tfc.util.calendar.ICalendar;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.world.classic.worldgen.WorldGenBerryBushes;
 import net.minecraft.item.ItemStack;
+
+import java.time.Month;
 
 import static net.dries007.tfc.api.types.IBerryBush.Size.*;
 
@@ -74,7 +75,7 @@ public enum BerryBush implements IBerryBush {
         Month testing = this.harvestMonthStart;
         for (int i = 0; i < this.harvestingMonths; i++) {
             if (testing.equals(month)) return true;
-            testing = testing.next();
+            testing = CalendarTFC.next(testing);
         }
         return false;
     }

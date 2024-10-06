@@ -5,8 +5,9 @@
 
 package net.dries007.tfc.api.types;
 
-import net.dries007.tfc.util.calendar.Month;
 import net.minecraft.item.ItemStack;
+
+import java.time.Month;
 
 public interface IBerryBush {
     /**

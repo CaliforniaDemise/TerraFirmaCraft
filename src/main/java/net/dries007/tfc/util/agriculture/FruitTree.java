@@ -9,7 +9,6 @@ import net.dries007.tfc.api.types.IFruitTree;
 import net.dries007.tfc.objects.items.food.ItemFoodTFC;
 import net.dries007.tfc.util.calendar.CalendarTFC;
 import net.dries007.tfc.util.calendar.ICalendar;
-import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.world.classic.worldgen.WorldGenFruitTrees;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -21,6 +20,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.time.Month;
 import java.util.List;
 
 public enum FruitTree implements IFruitTree {
@@ -79,7 +79,7 @@ public enum FruitTree implements IFruitTree {
         Month testing = this.flowerMonthStart;
         for (int i = 0; i < this.floweringMonths; i++) {
             if (testing.equals(month)) return true;
-            testing = testing.next();
+            testing = CalendarTFC.next(testing);
         }
         return false;
     }
@@ -89,7 +89,7 @@ public enum FruitTree implements IFruitTree {
         Month testing = this.harvestMonthStart;
         for (int i = 0; i < this.harvestingMonths; i++) {
             if (testing.equals(month)) return true;
-            testing = testing.next();
+            testing = CalendarTFC.next(testing);
         }
         return false;
     }

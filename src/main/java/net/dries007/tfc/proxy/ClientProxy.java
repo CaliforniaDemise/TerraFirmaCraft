@@ -7,7 +7,6 @@ package net.dries007.tfc.proxy;
 
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.calendar.CalendarTFC;
-import net.dries007.tfc.util.calendar.Month;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +18,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Month;
+import java.util.Locale;
 
 @SuppressWarnings("unused")
 @SideOnly(Side.CLIENT)
@@ -53,10 +54,11 @@ public class ClientProxy implements IProxy {
         }
     }
 
+    // TODO Get month name
     @Nonnull
     @Override
     public String getMonthName(Month month, boolean useSeasons) {
-        return I18n.format(useSeasons ? "tfc.enum.season." + month.name().toLowerCase() : Helpers.getEnumName(month));
+        return I18n.format(useSeasons ? "tfc.enum.season." + month.name().toLowerCase(Locale.US) : Helpers.getEnumName(month));
     }
 
     @Nonnull
