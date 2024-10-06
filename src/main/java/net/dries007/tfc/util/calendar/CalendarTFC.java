@@ -59,6 +59,24 @@ public final class CalendarTFC implements INBTSerializable<NBTTagCompound> {
         return Month.of(index);
     }
 
+    public static String getMonthName(Month month) {
+        switch (month) {
+            case JANUARY: return "january";
+            case FEBRUARY: return "february";
+            case MARCH: return "march";
+            case APRIL: return "april";
+            case MAY: return "may";
+            case JUNE: return "june";
+            case JULY: return "july";
+            case AUGUST: return "august";
+            case SEPTEMBER: return "september";
+            case OCTOBER: return "october";
+            case NOVEMBER: return "november";
+            case DECEMBER: return "december";
+            default: return "";
+        }
+    }
+
     public static float getTemperatureModifier(Month month) {
         switch (month) {
             case JANUARY: return 66.5f;

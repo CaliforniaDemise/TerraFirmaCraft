@@ -54,11 +54,10 @@ public class ClientProxy implements IProxy {
         }
     }
 
-    // TODO Get month name
     @Nonnull
     @Override
     public String getMonthName(Month month, boolean useSeasons) {
-        return I18n.format(useSeasons ? "tfc.enum.season." + month.name().toLowerCase(Locale.US) : Helpers.getEnumName(month));
+        return I18n.format(useSeasons ? "tfc.enum.season." + CalendarTFC.getMonthName(month) : Helpers.getEnumName(month));
     }
 
     @Nonnull
