@@ -10,6 +10,7 @@ import net.dries007.tfc.ConfigTFC;
 import net.dries007.tfc.api.util.FallingBlockManager;
 import net.dries007.tfc.objects.blocks.stone.BlockOreTFC;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -19,11 +20,14 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -130,8 +134,11 @@ public class EntityFallingBlockTFC extends EntityFallingBlock implements IEntity
                 final IBlockState current = world.getBlockState(pos);
                 Material material = currentSpecification.getResultingState(fallTile).getMaterial();
 
+                boolean curCheck = !(current.getBlock() instanceof IFluidBlock) && !(current.getBlock() instanceof BlockLiquid);
+
                 if (!current.getBlock().isAir(current, world, pos) && FallingBlockManager.canFallThrough(world, pos, material, current)) {
-                    world.destroyBlock(pos, true);
+                    if (curCheck)
+                        world.destroyBlock(pos, true);
                     return;
                 }
 
@@ -139,7 +146,8 @@ public class EntityFallingBlockTFC extends EntityFallingBlock implements IEntity
                 IBlockState downState = world.getBlockState(downPos);
 
                 if (!downState.getBlock().isAir(downState, world, downPos) && FallingBlockManager.canFallThrough(world, downPos, material, downState)) {
-                    world.destroyBlock(downPos, true);
+                    if (!(downState.getBlock() instanceof IFluidBlock) && !(downState.getBlock() instanceof BlockLiquid))
+                        world.destroyBlock(downPos, true);
                     return;
                 } else if (ConfigTFC.General.FALLABLE.destroyOres && downState.getBlock() instanceof BlockOreTFC) {
                     world.destroyBlock(downPos, false);
