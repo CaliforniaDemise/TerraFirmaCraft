@@ -114,6 +114,7 @@ public class ItemFireStarter extends ItemTFC {
     public void onUsingTick(ItemStack stack, EntityLivingBase entityLivingBase, int countLeft) {
         if (!(entityLivingBase instanceof EntityPlayer)) return;
         final EntityPlayer player = (EntityPlayer) entityLivingBase;
+        final World world = player.world;
         final RayTraceResult result = canStartFire(player.world, player);
         if (result == null) {
             player.resetActiveHand();
@@ -121,13 +122,12 @@ public class ItemFireStarter extends ItemTFC {
         }
         final int total = getMaxItemUseDuration(stack);
         final int count = total - countLeft;
-        final BlockPos pos = result.getBlockPos().offset(result.sideHit);
-        final World world = player.world;
+        final BlockPos pos = world.getBlockState(result.getBlockPos()).getBlock().isReplaceable(world, result.getBlockPos()) ? result.getBlockPos() : result.getBlockPos().offset(result.sideHit);
         // Base chance
         float chance = (float) ConfigTFC.General.MISC.fireStarterChance;
         // Raining reduces chance by half
         if (world.isRainingAt(pos)) {
-            chance *= 0.5;
+            chance *= 0.5F;
         }
 
         if (world.isRemote) // Client
@@ -142,15 +142,15 @@ public class ItemFireStarter extends ItemTFC {
             if (count % 3 == 1) {
                 player.playSound(TFCSounds.FIRE_STARTER, 0.5f, 0.05F);
             }
-        } else if (countLeft == 1) // Server, and last tick of use
-        {
+        }
+        else if (countLeft == 1) { // Server, and last tick of use
             stack.damageItem(1, player);
-            final IBlockState state = world.getBlockState(pos.down());
+            final IBlockState state = world.getBlockState(pos.offset(result.sideHit.getOpposite()));
             if (state.getBlock() == BlocksTFC.LOG_PILE) {
                 // Log pile
                 if (itemRand.nextFloat() < chance) {
-                    world.setBlockState(pos.down(), state.withProperty(LIT, true));
-                    TELogPile te = Helpers.getTE(world, pos.down(), TELogPile.class);
+                    world.setBlockState(pos.offset(result.sideHit.getOpposite()), state.withProperty(LIT, true));
+                    TELogPile te = Helpers.getTE(world, pos.offset(result.sideHit.getOpposite()), TELogPile.class);
                     if (te != null) {
                         te.light();
                         TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
@@ -162,7 +162,7 @@ public class ItemFireStarter extends ItemTFC {
             } else if (state.getBlock() == BlocksTFC.PIT_KILN) {
                 // Pit Kiln
                 if (itemRand.nextFloat() < chance) {
-                    TEPitKiln te = Helpers.getTE(world, pos.down(), TEPitKiln.class);
+                    TEPitKiln te = Helpers.getTE(world, pos.offset(result.sideHit.getOpposite()), TEPitKiln.class);
                     if (te != null) {
                         te.tryLight();
                         TFCTriggers.LIT_TRIGGER.trigger((EntityPlayerMP) player, state.getBlock()); // Trigger lit block
@@ -238,8 +238,11 @@ public class ItemFireStarter extends ItemTFC {
         if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK) {
             BlockPos pos = result.getBlockPos();
             final IBlockState current = world.getBlockState(pos);
-            if (current.isSideSolid(world, pos, result.sideHit) && !current.getMaterial().isLiquid()) {
-                if (world.isAirBlock(pos.offset(result.sideHit))) {
+            if (current.getMaterial().isLiquid()) return null;
+            if (current.getBlock().isReplaceable(world, pos)) return result;
+            if (current.isSideSolid(world, pos, result.sideHit)) {
+                BlockPos sidePos = pos.offset(result.sideHit);
+                if (world.getBlockState(sidePos).getBlock().isReplaceable(world, sidePos)) {
                     return result;
                 }
             }
