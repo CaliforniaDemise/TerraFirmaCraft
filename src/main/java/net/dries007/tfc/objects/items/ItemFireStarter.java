@@ -121,7 +121,7 @@ public class ItemFireStarter extends ItemTFC {
         }
         final int total = getMaxItemUseDuration(stack);
         final int count = total - countLeft;
-        final BlockPos pos = result.getBlockPos().add(0, 1, 0);
+        final BlockPos pos = result.getBlockPos().offset(result.sideHit);
         final World world = player.world;
         // Base chance
         float chance = (float) ConfigTFC.General.MISC.fireStarterChance;
@@ -238,8 +238,8 @@ public class ItemFireStarter extends ItemTFC {
         if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK) {
             BlockPos pos = result.getBlockPos();
             final IBlockState current = world.getBlockState(pos);
-            if (result.sideHit == EnumFacing.UP && current.isSideSolid(world, pos, EnumFacing.UP) && !current.getMaterial().isLiquid()) {
-                if (world.isAirBlock(pos.up())) {
+            if (current.isSideSolid(world, pos, result.sideHit) && !current.getMaterial().isLiquid()) {
+                if (world.isAirBlock(pos.offset(result.sideHit))) {
                     return result;
                 }
             }
