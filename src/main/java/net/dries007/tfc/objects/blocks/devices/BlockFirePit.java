@@ -27,6 +27,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -53,6 +54,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static net.dries007.tfc.Constants.RNG;
@@ -314,7 +316,15 @@ public class BlockFirePit extends Block implements IBellowsConsumerBlock, ILight
         if (state.getValue(LIT) && !entityIn.isImmuneToFire() && entityIn instanceof EntityLivingBase) {
             entityIn.setFire(40);
         }
-        //todo: handle fuel and item inputs from thrown entities
+        if (entityIn instanceof EntityItem) {
+            EntityItem item = (EntityItem) entityIn;
+            TEFirePit firePit = (TEFirePit) Objects.requireNonNull(worldIn.getTileEntity(pos));
+            item.setItem(firePit.tryInsertingAll(item.getItem()));
+            if (item.getItem().getCount() == 0 || item.getItem().isEmpty()) {
+                item.setDead();
+                return;
+            }
+        }
         super.onEntityCollision(worldIn, pos, state, entityIn);
     }
 
