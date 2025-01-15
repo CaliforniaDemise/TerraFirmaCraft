@@ -58,6 +58,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 import static net.dries007.tfc.objects.blocks.BlockPlacedHide.SIZE;
@@ -88,9 +89,9 @@ public final class ClientRegisterEvents {
         }
 
         // Gems
-        for (ItemGem item : ItemsTFC.getAllGemItems())
-            for (Gem.Grade grade : Gem.Grade.values())
-                registerEnumBasedMetaItems("gem", grade, item);
+        for (ItemGem item : ItemsTFC.getAllGemItems()) {
+            ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(Objects.requireNonNull(item.getRegistryName()), "inventory"));
+        }
 
         // Ore Items
         for (ItemOreTFC item : ItemsTFC.getAllOreItems())

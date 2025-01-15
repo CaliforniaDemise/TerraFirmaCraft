@@ -217,8 +217,12 @@ public final class ItemsTFC {
 
         {
             Builder<ItemGem> b = new Builder<>();
-            for (Gem gem : Gem.values())
-                b.add(register(r, "gem/" + gem.name().toLowerCase(), new ItemGem(gem), CT_GEMS));
+            for (Gem gem : Gem.values()) {
+                for (Gem.Grade grade : Gem.Grade.values()) {
+                    Item item = gem.register(grade);
+                    if (item != Items.AIR) b.add(register(r, "gem/" + grade.getName() + "/" + gem.name().toLowerCase(), new ItemGem(gem, grade), CT_GEMS));
+                }
+            }
             allGemItems = b.build();
         }
 
