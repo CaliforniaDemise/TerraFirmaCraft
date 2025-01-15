@@ -251,7 +251,6 @@ public final class ItemsTFC {
         for (Tree wood : TFCRegistries.TREES.getValuesCollection()) {
             simpleItems.add(register(r, "wood/lumber/" + wood.getRegistryName().getPath(), new ItemLumberTFC(wood), CT_WOOD));
             simpleItems.add(register(r, "wood/boat/" + wood.getRegistryName().getPath(), new ItemBoatTFC(wood), CT_WOOD));
-            simpleItems.add(register(r, "wood/branch/" + wood.getRegistryName().getPath(), new ItemBranchTFC(wood), CT_WOOD));
         }
 
         simpleItems.add(register(r, "stick_bunch", new ItemMisc(Size.NORMAL, Weight.LIGHT), CT_WOOD));
